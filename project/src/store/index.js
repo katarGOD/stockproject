@@ -2,22 +2,19 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import auth from './auth'
-import example from './module-example'
+import layout from './layout'
+import main from './main'
+import notify from './notify'
 
 Vue.use(Vuex)
 
-/*
- * If not building with SSR mode, you can
- * directly export the Store instantiation
- */
+const store = new Vuex.Store({
+  modules: {
+    auth,
+    layout,
+    main,
+    notify
+  }
+})
 
-export default function (/* { ssrContext } */) {
-  const Store = new Vuex.Store({
-    modules: {
-      example,
-      auth
-    }
-  })
-
-  return Store
-}
+export default store

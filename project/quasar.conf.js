@@ -4,9 +4,24 @@ module.exports = function (ctx) {
   return {
     // app plugins (/src/plugins)
     plugins: [
-      'i18n',
+      'axios',
+      'change-case',
       'firebase',
-      'axios'
+      'is-base64',
+      'email-validator',
+      'i18n',
+      'line-api',
+      'number-to-words',
+      'thai-baht-text',
+      'vue-drag-drop',
+      'vue-firestore',
+      'vue-browser-geolocation',
+      'vue-json-excel',
+      'vue-lodash',
+      'vue-full-calendar',
+      'vue-simple-calendar',
+      'vuelidate',
+      'base64-img'
     ],
     css: [
       'app.styl'
@@ -18,10 +33,10 @@ module.exports = function (ctx) {
       // 'mdi',
       // 'fontawesome'
     ],
-    supportIE: false,
+    supportIE: true,
     build: {
       scopeHoisting: true,
-      // vueRouterMode: 'history',
+      vueRouterMode: 'history',
       // vueCompiler: true,
       // gzip: true,
       // analyze: true,
@@ -31,7 +46,7 @@ module.exports = function (ctx) {
           enforce: 'pre',
           test: /\.(js|vue)$/,
           loader: 'eslint-loader',
-          exclude: /node_modules/
+          exclude: /(node_modules|quasar)/
         })
       }
     },
@@ -43,26 +58,76 @@ module.exports = function (ctx) {
     // framework: 'all' --- includes everything; for dev only!
     framework: {
       components: [
-        'QLayout',
-        'QLayoutHeader',
-        'QLayoutDrawer',
-        'QPageContainer',
-        'QPage',
-        'QToolbar',
-        'QToolbarTitle',
+        'QAutocomplete',
         'QBtn',
+        'QBtnDropdown',
+        'QBtnGroup',
+        'QBtnToggle',
+        'QCard',
+        'QCardActions',
+        'QCardMain',
+        'QCardMedia',
+        'QCardSeparator',
+        'QCardTitle',
+        'QCheckbox',
+        'QChip',
+        'QChipsInput',
+        'QCollapsible',
+        'QDatetime',
+        'QDatetimePicker',
+        'QEditor',
+        'QField',
         'QIcon',
-        'QList',
-        'QListHeader',
+        'QInnerLoading',
+        'QInput',
         'QItem',
         'QItemMain',
-        'QItemSide'
+        'QItemSeparator',
+        'QItemSide',
+        'QItemTile',
+        'QLayout',
+        'QLayoutDrawer',
+        'QLayoutHeader',
+        'QList',
+        'QListHeader',
+        'QModal',
+        'QOptionGroup',
+        'QPage',
+        'QPageContainer',
+        'QPageSticky',
+        'QProgress',
+        'QRadio',
+        'QRange',
+        'QRouteTab',
+        'QScrollArea',
+        'QSearch',
+        'QSelect',
+        'QSlider',
+        'QSpinner',
+        'QStep',
+        'QStepper',
+        'QStepperNavigation',
+        'QTab',
+        'QTabPane',
+        'QTable',
+        'QTableColumns',
+        'QTabs',
+        'QTd',
+        'QToggle',
+        'QToolbar',
+        'QToolbarTitle',
+        'QTr',
+        'QUploader'
       ],
       directives: [
+        'BackToTop',
+        'CloseOverlay',
         'Ripple'
       ],
       // Quasar plugins
       plugins: [
+        'Dialog',
+        'Loading',
         'Notify'
       ]
       // iconSet: ctx.theme.mat ? 'material-icons' : 'ionicons'
