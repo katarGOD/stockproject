@@ -25,30 +25,21 @@
         <q-item-side icon="home" />
         <q-item-main :label="$t('Home')"/>
       </q-item>
-      <!-- dashboard -->
+      <!-- dashboard
       <q-item to="/dashboard" exact>
         <q-item-side icon="dashboard" />
         <q-item-main :label="$t('Dashboard')"/>
-      </q-item>
+      </q-item> -->
       <template v-if="userEmailVerified">
         <template v-if="userId">
           <!-- my-section -->
           <my-section v-if="userId"/>
-          <!-- team-supervisor -->
-          <team-supervisor v-if="hasPermission(['team-supervisor'])"/>
 
           <q-list-header>{{$t('Operation')}}</q-list-header>
-
-          <!-- planner -->
-          <planner v-if="hasPermission(['planner'])"/>
-          <!-- personnel -->
-          <personnel v-if="hasPermission(['personnel'])"/>
-          <!-- payroll -->
-          <payroll v-if="hasPermission(['payroll'])"/>
-          <!-- systemSetting -->
-          <system-setting v-if="hasPermission(['system-setting'])"/>
-          <!-- utilities -->
-          <utilities v-if="hasPermission(['utilities'])"/>
+          <product/>
+          <stock-management/>
+          <config/>
+          <return-mer/>
           <!-- Access Control -->
           <access-control v-if="hasPermission(['access-control'])"/>
         </template>
@@ -73,16 +64,12 @@ import { mapGetters } from 'vuex'
 import hasPermission from 'src/components/shared/hasPermission'
 // import menu
 import mySection from './mySection'
-import teamSupervisor from './teamSupervisor'
-import inventory from './inventory'
-import purchaseOrders from './purchaseOrders'
-import services from './services'
-import planner from './planner'
-import personnel from './personnel'
-import payroll from './payroll'
 import systemSetting from './systemSetting'
-import utilities from './utilities'
 import accessControl from './accessControl'
+import config from './config'
+import product from './product'
+import stockManagement from './stockManagement'
+import returnMer from './returnMer'
 
 // export
 export default {
@@ -93,16 +80,13 @@ export default {
   // components
   components: {
     mySection,
-    teamSupervisor,
-    inventory,
-    purchaseOrders,
-    services,
-    planner,
-    personnel,
-    payroll,
+    config,
     systemSetting,
-    utilities,
-    accessControl
+    accessControl,
+    product,
+    stockManagement,
+    returnMer
+
   },
   // computed
   computed: {

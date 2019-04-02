@@ -23,7 +23,7 @@
       <!-- selection -->
       <template slot="top-selection" slot-scope="props">
         <div style="padding-top: 8px; padding-bottom: 8px;">
-          <q-btn v-if="selected.length==1" :disable="!hasPermission(['access-control--user-accounts--create'])" color="primary" round icon="edit" class="q-mr-sm" @click="openUpdateFrom(inputForm, selected[0])" />
+          <q-btn v-if="selected.length==1"  color="primary" round icon="edit" class="q-mr-sm" @click="openUpdateFrom(inputForm, selected[0])" />
         </div>
       </template>
       <!-- top-left -->
@@ -114,38 +114,6 @@
               :options="localeOptions"
             />
           </q-field>
-          <!-- Department -->
-          <q-field
-            :label="$t('Department')"
-            :label-width="labelWidth"
-          >
-            <q-select
-              v-model="inputForm.department"
-              :options="departmentOptions"
-            />
-          </q-field>
-          <!-- Position -->
-          <q-field
-            :label="$t('Position')"
-            :label-width="labelWidth"
-          >
-            <q-select
-              v-model="inputForm.position"
-              :options="positionOptions"
-            />
-          </q-field>
-          <!-- field reportTo -->
-          <q-field
-            :label="$t('Report to')"
-            :label-width="labelWidth"
-          >
-            <q-select
-              filter
-              autofocus-filter
-              v-model="inputForm.reportTo"
-              :options="authUserOptions"
-            />
-          </q-field>
           <!-- field active -->
           <q-field
             :label="$t('Active')"
@@ -177,7 +145,6 @@
             color="primary"
             icon="save"
             wait-for-ripple
-            :disable="$v.inputForm.$invalid"
             :label="$t('Save')"
             @click="updateForm"
           />
@@ -253,9 +220,6 @@ export default {
         firstName: '',
         lastName: '',
         locale: '',
-        department: '',
-        position: '',
-        reportTo: '',
         active: false,
         authGroup: []
       }

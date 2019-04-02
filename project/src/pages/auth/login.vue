@@ -1,7 +1,6 @@
 <template>
-  <q-page>
-    <div class="row justify-between gutter-md">
-      <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
+<q-page class="flex flex-center">
+        <q-card inline style="width: 650px">
       <q-card-title>
         <q-icon name="vpn_key"/> {{ $t('Login') }}
         <span slot="right">{{ $t('Welcome back') }}</span>
@@ -60,9 +59,8 @@
           @click="$router.push('/auth/signup/phone')"
         />
       </q-card-actions>
-      </div>
-    </div>
-  </q-page>
+        </q-card>
+</q-page>
 </template>
 
 <script>

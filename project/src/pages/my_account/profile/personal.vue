@@ -150,61 +150,6 @@
             @blur="$v.inputForm.lastName.$touch()"
           />
         </q-field>
-        <!-- Branch -->
-        <q-field
-          :label="$t('Branch')+' *'"
-          :label-width="labelWidth"
-          :error="$v.inputForm.branch.$error"
-          :error-label="$t('Requires non-empty data')"
-        >
-          <q-select
-            v-model="inputForm.branch"
-            :disable="!hasPermission(['personnel--employee-management--update'])"
-            :options="branchOptions"
-            @blur="$v.inputForm.branch.$touch()"
-          />
-        </q-field>
-        <!-- Department -->
-        <q-field
-          :label="$t('Department')+' *'"
-          :label-width="labelWidth"
-          :error="$v.inputForm.department.$error"
-          :error-label="$t('Requires non-empty data')"
-        >
-          <q-select
-            v-model="inputForm.department"
-            :disable="!hasPermission(['personnel--employee-management--update'])"
-            :options="departmentOptions"
-            @blur="$v.inputForm.department.$touch()"
-          />
-        </q-field>
-        <!-- Position -->
-        <q-field
-          :label="$t('Position')+' *'"
-          :label-width="labelWidth"
-          :error="$v.inputForm.position.$error"
-          :error-label="$t('Requires non-empty data')"
-        >
-          <q-select
-            v-model="inputForm.position"
-            :disable="!hasPermission(['personnel--employee-management--update'])"
-            :options="positionOptions"
-            @blur="$v.inputForm.position.$touch()"
-          />
-        </q-field>
-        <!-- reportTo -->
-          <q-field
-            :label="$t('Report to')"
-            :label-width="labelWidth"
-            :error="$v.inputForm.reportTo.$error"
-            :error-label="$t('Requires non-empty data')"
-            >
-            <q-select
-              v-model="inputForm.reportTo"
-              :options="authUserOptions"
-              @blur="$v.inputForm.reportTo.$touch()"
-            />
-          </q-field>
         <!-- field idCard -->
         <q-field
           :label="$t('ID card')+' *'"

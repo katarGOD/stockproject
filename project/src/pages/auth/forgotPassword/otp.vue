@@ -135,6 +135,7 @@
 
 <script>
 import firebase from 'firebase'
+import router from 'src/router'
 import { mapActions, mapMutations, mapGetters } from 'vuex'
 import { required, minLength, sameAs } from 'vuelidate/lib/validators'
 import langSwitch from 'src/components/shared/langSwitch'
@@ -248,7 +249,7 @@ export default {
           })
           vm.setLeftDrawerState(false)
           vm.signUserOut()
-          vm.$router.push('/login')
+          router.push('/login')
         }).catch(function (error) {
           alert('Error :' + error.message)
         })

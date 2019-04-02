@@ -23,7 +23,6 @@
             color="primary"
             icon="edit"
             round
-            :disable="!hasPermission(['personnel--employee-management--update'])"
             @click="openUpdateFrom(inputForm, selected[0])"
           />
           <q-btn
@@ -31,7 +30,6 @@
             color="negative"
             icon="delete"
             round
-            :disable="!hasPermission(['personnel--employee-management--update'])"
             @click="deleteRow()"
           />
         </div>
@@ -43,7 +41,6 @@
           color="secondary"
           icon="add_circle"
           round
-          :disable="!hasPermission(['personnel--employee-management--update'])"
           @click="openAddForm(inputForm)"
         />
         <q-search
@@ -91,7 +88,6 @@
           >
             <q-select
               v-model="inputForm.type"
-              :disable="!hasPermission(['personnel--employee-management--update'])"
               :options="typeOptions"
               @blur="$v.inputForm.type.$touch()"
             />
@@ -105,7 +101,6 @@
           >
             <q-input
               v-model="inputForm.streetAddress"
-              :disable="!hasPermission(['personnel--employee-management--update'])"
               @blur="$v.inputForm.streetAddress.$touch()"
             />
           </q-field>
@@ -118,7 +113,6 @@
           >
             <q-input
               v-model="inputForm.city"
-              :disable="!hasPermission(['personnel--employee-management--update'])"
               @blur="$v.inputForm.city.$touch()"
             />
           </q-field>
@@ -144,7 +138,6 @@
           >
             <q-input
               v-model="inputForm.postcode"
-              :disable="!hasPermission(['personnel--employee-management--update'])"
               @blur="$v.inputForm.postcode.$touch()"
             />
           </q-field>
@@ -155,7 +148,6 @@
           >
             <q-editor
               v-model="inputForm.note"
-              :disable="!hasPermission(['personnel--employee-management--update'])"
             />
           </q-field>
           <!-- submit -->

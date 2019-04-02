@@ -100,50 +100,6 @@ export default [
       { path: 'my-account',
         component: () => import('pages/my_account/index'),
         children: [
-          // time-clock
-          { path: 'time-clock',
-            component: () => import('pages/my_account/timeClock'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
-          // tasks
-          { path: 'tasks',
-            component: () => import('pages/my_account/tasks'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
-          // calendar
-          { path: 'calendar',
-            component: () => import('pages/my_account/calendar'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
-          // leaveRequest
-          { path: 'leave-request',
-            component: () => import('pages/my_account/leaveRequest'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
-          // leaveRequest
-          { path: 'leave-request-bak',
-            component: () => import('pages/my_account/leaveRequestBak'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
-          { path: 'leave-approve',
-            component: () => import('pages/my_account/leaveApprove'),
-            beforeEnter: (to, from, next) => hasPermission(['planning--approve-leave-request'], next, to)
-          },
-          // overtimeRequest
-          { path: 'overtime-request',
-            component: () => import('pages/my_account/overtimeRequest'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
-          // overtimeRequest
-          { path: 'approve-overtime-request',
-            component: () => import('pages/my_account/ApproveOvertimeRequest'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
-          // overtimeRequest
-          { path: 'approve-overtime-approve',
-            component: () => import('pages/my_account/ApproveOvertimeRequest'),
-            beforeEnter: (to, from, next) => requiresLogin(next)
-          },
           // profile
           { path: 'profile/:id',
             component: () => import('pages/my_account/profile/index'),
@@ -215,6 +171,51 @@ export default [
           // my-team
           { path: 'my-team',
             component: () => import('pages/my_account/myTeam'),
+            beforeEnter: (to, from, next) => requiresLogin(next)
+          }
+        ]
+      },
+      // auth
+      { path: 'config',
+        component: () => import('pages/config/index'),
+        children: [
+          { path: 'product-type',
+            component: () => import('pages/config/productType'),
+            beforeEnter: (to, from, next) => requiresLogin(next)
+          },
+          { path: 'stock-type',
+            component: () => import('pages/config/stockType'),
+            beforeEnter: (to, from, next) => requiresLogin(next)
+          }
+        ]
+      },
+      { path: 'product-management',
+        component: () => import('pages/productManagement/index'),
+        children: [
+          { path: 'product',
+            component: () => import('pages/productManagement/product'),
+            beforeEnter: (to, from, next) => requiresLogin(next)
+          }
+        ]
+      },
+      { path: 'stock-management',
+        component: () => import('pages/stockManagement/index'),
+        children: [
+          { path: 'po',
+            component: () => import('pages/stockManagement/po'),
+            beforeEnter: (to, from, next) => requiresLogin(next)
+          },
+          { path: 'withdraw',
+            component: () => import('pages/stockManagement/withdraw'),
+            beforeEnter: (to, from, next) => requiresLogin(next)
+          }
+        ]
+      },
+      { path: 'return-merchandise',
+        component: () => import('pages/returnMer/index'),
+        children: [
+          { path: 'merchandise',
+            component: () => import('pages/returnMer/merchandise'),
             beforeEnter: (to, from, next) => requiresLogin(next)
           }
         ]
