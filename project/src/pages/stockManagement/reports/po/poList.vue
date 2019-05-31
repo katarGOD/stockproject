@@ -107,24 +107,25 @@ export default {
           .get()
           .then(function (docs) {
             datatable.push([
-              vm.$t('รหัสสินค้า'), vm.$t('ผู้ทำรายการ'),
-              vm.$t('วันเวลา'), vm.$t('หมวดหมู่อุปกรณ์'),
-              vm.$t('ประเภทอุปกรณ์'), vm.$t('รายละเอียด'),
+              vm.$t('วันเวลา'), vm.$t('ผู้ทำรายการ'),
+              vm.$t('รหัสสินค้า'), vm.$t('หมวดหมู่อุปกรณ์'),
+              vm.$t('ประเภทอุปกรณ์'),
               vm.$t('สินค้า'), vm.$t('จำนวน'),
-              vm.$t('ราคารวม'), vm.$t('สถานะการอนุมัติ')
+              vm.$t('ราคารวม'), vm.$t('รายละเอียด'),
+              vm.$t('สถานะการอนุมัติ')
             ])
             docs.forEach(function (doc) {
               productCount++
               datatable.push([
-                {text: `${doc.data().code}`, alignment: 'left'},
-                {text: `${doc.data().createdBy}`, alignment: 'left'},
                 {text: `${doc.data().createdOn}`, alignment: 'left'},
+                {text: `${doc.data().createdBy}`, alignment: 'left'},
+                {text: `${doc.data().code}`, alignment: 'left'},
                 {text: `${doc.data().stockType}`, alignment: 'left'},
                 {text: `${doc.data().productType}`, alignment: 'left'},
-                {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().product}`, alignment: 'left'},
                 {text: `${doc.data().qty}`, alignment: 'left'},
                 {text: `${doc.data().totalPrice}`, alignment: 'left'},
+                {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().approval}`, alignment: 'left'}
               ])
             })

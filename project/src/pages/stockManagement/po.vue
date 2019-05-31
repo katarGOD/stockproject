@@ -465,6 +465,16 @@ export default {
         total = price * vm.inputForm.qty
         vm.inputForm.totalPrice = total
       }
+    },
+    'inputForm.qty' () {
+      let vm = this
+      let total = 0
+      if (vm.inputForm.product) {
+        let price = vm._.find(vm.productAll, {'id': vm.inputForm.product}).price
+        console.log(price)
+        total = price * vm.inputForm.qty
+        vm.inputForm.totalPrice = total
+      }
     }
   }
 }
