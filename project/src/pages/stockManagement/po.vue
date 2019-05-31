@@ -149,6 +149,12 @@
             />
           </q-field>
           <q-field
+            :label="$t('Description')"
+            :label-width="labelWidth"
+          >
+            <q-input v-model="inputForm.description"/>
+          </q-field>
+          <q-field
             :label="$t('Product') + ' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.product.$error"
@@ -161,12 +167,6 @@
             />
           </q-field>
           <!-- field description -->
-          <q-field
-            :label="$t('Description')"
-            :label-width="labelWidth"
-          >
-            <q-input v-model="inputForm.description"/>
-          </q-field>
           <q-field
             :label="$t('Qty')+' *'"
             :label-width="labelWidth"

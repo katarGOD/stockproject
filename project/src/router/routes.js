@@ -195,6 +195,15 @@ export default [
           { path: 'product',
             component: () => import('pages/productManagement/product'),
             beforeEnter: (to, from, next) => requiresLogin(next)
+          },
+          { path: 'product-report',
+            component: () => import('pages/productManagement/reports/product/index'),
+            children: [
+              { path: 'product-list',
+                component: () => import('pages/productManagement/reports/product/productList'),
+                beforeEnter: (to, from, next) => requiresLogin(next)
+              }
+            ]
           }
         ]
       },
@@ -208,6 +217,19 @@ export default [
           { path: 'withdraw',
             component: () => import('pages/stockManagement/withdraw'),
             beforeEnter: (to, from, next) => requiresLogin(next)
+          },
+          { path: 'stock-report',
+            component: () => import('pages/stockManagement/reports/index'),
+            children: [
+              { path: 'po-list',
+                component: () => import('pages/stockManagement/reports/po/poList'),
+                beforeEnter: (to, from, next) => requiresLogin(next)
+              },
+              { path: 'witdraw-list',
+                component: () => import('pages/stockManagement/reports/witdraw/witdrawList'),
+                beforeEnter: (to, from, next) => requiresLogin(next)
+              }
+            ]
           }
         ]
       },

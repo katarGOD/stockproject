@@ -21,9 +21,9 @@
     "is-base64": "^0.1.0",
     "is-offline": "^2.1.0",
     "line-api": "^0.1.4",
-    "npm": "^6.4.1",
+    "npm": "^6.9.0",
     "number-to-words": "^1.2.4",
-    "pdfmake": "^0.1.39",
+    "pdfmake": "^0.1.56",
     "thai-baht-text": "^1.0.7",
     "vue-browser-geolocation": "^1.5.0",
     "vue-drag-drop": "^1.1.4",
@@ -47,7 +47,7 @@
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-standard": "^3.0.1",
     "eslint-plugin-vue": "^4.3.0",
-    "quasar-cli": "^0.17.0",
+    "quasar-cli": "^0.17.24",
     "strip-ansi": "=3.0.1"
   },
   "engines": {

@@ -18,9 +18,9 @@
       <q-item-main :label="$t('Withdraw')"/>
     </q-item>
     <q-item
-      to="/product-management/product"
+      to="/stock-management/stock-report"
     >
-      <q-item-main :label="$t('Check Stock')"/>
+      <q-item-main :label="$t('รายงานการสั่งซื้อ/เบิก')"/>
     </q-item>
   </q-collapsible>
 </template>
