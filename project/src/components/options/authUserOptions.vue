@@ -17,7 +17,6 @@ export default {
         let vm = this
         let result = []
         vm.$database.collection('authUser')
-          .where('active', '==', true)
           .orderBy('firstName')
           .get()
           .then(docs => {
@@ -25,9 +24,6 @@ export default {
               result.push({
                 id: doc.id,
                 data: doc.data(),
-                department: doc.data().department,
-                reportTo: doc.data().reportTo,
-                photo: doc.data().photo,
                 value: doc.id,
                 label: `${doc.data().firstName} ${doc.data().lastName}`,
                 model: false

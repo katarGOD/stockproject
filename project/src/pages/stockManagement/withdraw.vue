@@ -226,6 +226,16 @@
             <q-btn
               v-if="formAction==='update'"
               class="q-mr-sm"
+              color="green"
+              icon="print"
+              wait-for-ripple
+              :disable="$v.inputForm.$invalid"
+              :label="$t('Print')"
+              @click="printRp"
+            />
+            <q-btn
+              v-if="formAction==='update'"
+              class="q-mr-sm"
               color="primary"
               icon="save"
               wait-for-ripple
@@ -251,20 +261,34 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { date } from 'quasar'
 import stockTypeOptions from 'src/components/options/stockTypeOptions'
+import authUserOptions from 'src/components/options/authUserOptions'
 import hasPermission from 'src/components/shared/hasPermission'
 import productOptions from 'src/components/options/productOptions'
 import productTypeOptions from 'src/components/options/productTypeOptions'
 import { required, numeric } from 'vuelidate/lib/validators'
 import crudProcess from 'src/components/datatable/crudProcess'
 import publicVars from 'src/components/shared/publicVars'
+import pdfMake from 'pdfmake/build/pdfmake'
+import pdfFonts from 'pdfmake/build/vfs_fonts'
 
+pdfMake.vfs = pdfFonts.pdfMake.vfs
+pdfMake.fonts = {
+  THSarabun: {
+    normal: 'THSarabun.ttf',
+    bold: 'THSarabun Bold.ttf',
+    italics: 'THSarabun Italic.ttf',
+    bolditalics: 'THSarabun Bold Italic.ttf'
+  }
+}
 export default {
   name: 'Purchase Order',
   // mixins
   mixins: [
     crudProcess,
     stockTypeOptions,
+    authUserOptions,
     productOptions,
     hasPermission,
     productTypeOptions,
@@ -486,6 +510,191 @@ export default {
           return resolve(true)
         })
       })
+    },
+    async printRp () {
+      let vm = this
+      let reportData = []
+      vm.$q.loading.show()
+      reportData = await vm.getReportData()
+      vm.$q.loading.hide()
+      pdfMake.createPdf(this.slipDocDefinition(reportData)).open()
+    },
+    slipDocDefinition (reportData) {
+      let result = {
+        pageSize: 'A4',
+        pageOrientation: 'portrait',
+        defaultStyle: {
+          font: 'THSarabun'
+        },
+        content: [
+          reportData
+        ],
+        styles: {
+          title: {
+            fontSize: 24,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          header: {
+            fontSize: 16,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          subheader: {
+            fontSize: 14,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          tableHeader: {
+            fontSize: 14,
+            bold: true,
+            fillColor: '#dddddd',
+            margin: [5, 5, 5, 5]
+          },
+          body: {
+            fontSize: 14,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          body1: {
+            fontSize: 14,
+            bold: true,
+            fillColor: '#dddddd',
+            margin: [5, 5, 5, 5]
+          },
+          body2: {
+            fontSize: 14,
+            bold: true,
+            fillColor: '#c0c0c0',
+            margin: [5, 5, 5, 5]
+          },
+          alignRight: {
+            alignment: 'right'
+          },
+          alignRightUnderline: {
+            alignment: 'right',
+            bold: true
+          }
+        }
+      }
+      return result
+    },
+    // getReportData
+    async getReportData () {
+      let product = await this.getProduct()
+      console.log(product)
+      return new Promise(resolve => {
+        let vm = this
+        let result = []
+        let datatable = []
+        vm.$database.collection('withdraw')
+          .doc(vm.inputForm['.key'])
+          .get()
+          .then(function (doc) {
+            console.log(doc.data())
+            datatable.push([
+              vm.$t('ลำดับที่'), vm.$t('ชื่อสินค้า'),
+              vm.$t('จำนวน'), vm.$t('คลัง'),
+              vm.$t('รวม')
+            ])
+            console.log(doc.data())
+            let eachProduct = vm._.find(product, {'id': doc.data().product})
+            let eachStockTypeOption = vm._.find(vm.stockTypeOptions, {'id': doc.data().stockType})
+            console.log(eachStockTypeOption)
+            datatable.push([
+              {text: `1`, alignment: 'left', rowSpan: 40},
+              {text: `${eachProduct.data.description}`, alignment: 'left', rowSpan: 40},
+              {text: `${doc.data().qty}`, alignment: 'center', rowSpan: 40},
+              {text: `${eachStockTypeOption.data.code}`, alignment: 'center', rowSpan: 40},
+              {text: `${doc.data().qty}`, alignment: 'center', rowSpan: 40}
+            ])
+            for (let i = 0; i < 39; i++) {
+              datatable.push([
+                {text: ``, alignment: 'left'},
+                {text: ``, alignment: 'left'},
+                {text: ``, alignment: 'left'},
+                {text: ``, alignment: 'left'}
+              ])
+            }
+            datatable.push(
+              [
+                {text: `หมายเหตุ\n` + doc.data().description, alignment: 'center', colSpan: 2},
+                {text: ``, alignment: 'left'},
+                {text: `รวมเป็นจำนวนทั้งสิ้น`, alignment: 'center', colSpan: 2},
+                {text: ``, alignment: 'left'},
+                {text: `${(doc.data().qty)}`, alignment: 'center'}
+              ]
+            )
+            result.push(
+              {
+                text: `${vm.applicationName}`,
+                style: 'header',
+                alignment: 'center'
+              }
+            )
+            result.push(
+              {
+                text: `ใบเบิกสินค้า`,
+                style: 'header',
+                alignment: 'center'
+              }
+            )
+            let authUser = vm._.find(vm.authUserOptions, {'id': doc.data().createdBy}).label
+            result.push(
+              [{
+                text: 'วันที่ทำรายการ: ' + date.formatDate(doc.data().createdOn, 'DD/MM/YYYY'),
+                fontSize: 16,
+                alignment: 'right'
+              }],
+              [{
+                text: 'เลขที่ใบเบิกสินค้า: ' + doc.data().code,
+                fontSize: 16,
+                alignment: 'right'
+              }],
+              [{
+                text: 'ผู้ทำรายการ: ' + authUser,
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: '\n รายการสินค้า',
+                fontSize: 16,
+                alignment: 'center'
+              }]
+            )
+            result.push({
+              table: {
+                headerRows: 1,
+                widths: [ 30, 280, 50, 50, 50 ],
+                body: datatable
+              }
+            })
+            result.push(
+              [{
+                text: 'หมายเหต',
+                fontSize: 16,
+                bold: true,
+                alignment: 'left'
+              }],
+              [{
+                text: '1). โปรดระบุใบสั่งซื้อข้างต้นในใบสั่งของทุกฉบับ',
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: '2). การวางบิลและรับเช็ค เป็นไปตามที่บริษัทกำหนดไว้                                               ___________________',
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: '3). ในการวางบิลเพื่อเรียกเก็บ ให้แนบสำเนาใบสั่งซื้อกำกับมาด้วย                                         ผู้มีอำนาจลงนาม',
+                fontSize: 16,
+                alignment: 'left'
+              }]
+            )
+            return resolve(result)
+          })
+      })
     }
   },
   // created
@@ -498,7 +707,7 @@ export default {
   },
   // computed
   computed: {
-    ...mapGetters(['userId'])
+    ...mapGetters(['userId', 'applicationName'])
   },
   watch: {
     'inputForm.product' () {

@@ -186,6 +186,10 @@ export default [
           { path: 'stock-type',
             component: () => import('pages/config/stockType'),
             beforeEnter: (to, from, next) => requiresLogin(next)
+          },
+          { path: 'supplier',
+            component: () => import('pages/config/supplier'),
+            beforeEnter: (to, from, next) => requiresLogin(next)
           }
         ]
       },
@@ -239,6 +243,15 @@ export default [
           { path: 'merchandise',
             component: () => import('pages/returnMer/merchandise'),
             beforeEnter: (to, from, next) => requiresLogin(next)
+          },
+          { path: 'merchandise-report',
+            component: () => import('pages/returnMer/reports/returnmer/index'),
+            children: [
+              { path: 'merchandise-list',
+                component: () => import('pages/returnMer/reports/returnmer/returnmerList'),
+                beforeEnter: (to, from, next) => requiresLogin(next)
+              }
+            ]
           }
         ]
       },

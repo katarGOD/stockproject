@@ -25,6 +25,18 @@
 // import
 import hasPermission from 'src/components/shared/hasPermission'
 import publicFunc from 'src/components/shared/publicFunc'
+import pdfMake from 'pdfmake/build/pdfmake'
+import pdfFonts from 'pdfmake/build/vfs_fonts'
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs
+pdfMake.fonts = {
+  THSarabun: {
+    normal: 'THSarabun.ttf',
+    bold: 'THSarabun Bold.ttf',
+    italics: 'THSarabun Italic.ttf',
+    bolditalics: 'THSarabun Bold Italic.ttf'
+  }
+}
 // export
 export default {
   // mixins

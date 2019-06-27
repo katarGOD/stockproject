@@ -18,6 +18,11 @@
     >
       <q-item-main :label="$t('Product Type')"/>
     </q-item>
+    <q-item
+      to="/config/supplier"
+    >
+      <q-item-main :label="$t('Supplier')"/>
+    </q-item>
   </q-collapsible>
 </template>
 

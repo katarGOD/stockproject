@@ -149,6 +149,18 @@
             />
           </q-field>
           <q-field
+            :label="$t('Supplier') + ' *'"
+            :label-width="labelWidth"
+            :error="$v.inputForm.supplier.$error"
+            :error-label="$t('Requires non-empty data')"
+          >
+            <q-select
+              v-model="inputForm.supplier"
+              :options="supplierOptions"
+              @blur="$v.inputForm.supplier.$touch()"
+            />
+          </q-field>
+          <q-field
             :label="$t('Description')"
             :label-width="labelWidth"
           >
@@ -222,6 +234,16 @@
             <q-btn
               v-if="formAction==='update'"
               class="q-mr-sm"
+              color="green"
+              icon="print"
+              wait-for-ripple
+              :disable="$v.inputForm.$invalid"
+              :label="$t('Print')"
+              @click="printReport"
+            />
+            <q-btn
+              v-if="formAction==='update'"
+              class="q-mr-sm"
               color="primary"
               icon="save"
               wait-for-ripple
@@ -247,14 +269,28 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { date } from 'quasar'
 import stockTypeOptions from 'src/components/options/stockTypeOptions'
+import authUserOptions from 'src/components/options/authUserOptions'
 import productOptions from 'src/components/options/productOptions'
+import supplierOptions from 'src/components/options/supplierOptions'
 import hasPermission from 'src/components/shared/hasPermission'
 import productTypeOptions from 'src/components/options/productTypeOptions'
 import { required, numeric } from 'vuelidate/lib/validators'
 import crudProcess from 'src/components/datatable/crudProcess'
 import publicVars from 'src/components/shared/publicVars'
+import pdfMake from 'pdfmake/build/pdfmake'
+import pdfFonts from 'pdfmake/build/vfs_fonts'
 
+pdfMake.vfs = pdfFonts.pdfMake.vfs
+pdfMake.fonts = {
+  THSarabun: {
+    normal: 'THSarabun.ttf',
+    bold: 'THSarabun Bold.ttf',
+    italics: 'THSarabun Italic.ttf',
+    bolditalics: 'THSarabun Bold Italic.ttf'
+  }
+}
 export default {
   name: 'Purchase Order',
   // mixins
@@ -262,6 +298,8 @@ export default {
     hasPermission,
     crudProcess,
     stockTypeOptions,
+    authUserOptions,
+    supplierOptions,
     productOptions,
     productTypeOptions,
     publicVars
@@ -320,6 +358,7 @@ export default {
         index: null,
         code: null,
         stockType: null,
+        supplier: null,
         product: null,
         productType: null,
         description: null,
@@ -353,6 +392,7 @@ export default {
       index: { required, numeric },
       code: { required },
       productType: { required },
+      supplier: { required },
       stockType: { required },
       product: { required },
       qty: { required, numeric },
@@ -441,6 +481,213 @@ export default {
           return resolve(result)
         })
       })
+    },
+    async printReport () {
+      let vm = this
+      let reportData = []
+      vm.$q.loading.show()
+      reportData = await vm.getReportData()
+      vm.$q.loading.hide()
+      pdfMake.createPdf(this.slipDocDefinition(reportData)).open()
+    },
+    slipDocDefinition (reportData) {
+      let result = {
+        pageSize: 'A4',
+        pageOrientation: 'portrait',
+        defaultStyle: {
+          font: 'THSarabun'
+        },
+        content: [
+          reportData
+        ],
+        styles: {
+          title: {
+            fontSize: 24,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          header: {
+            fontSize: 16,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          subheader: {
+            fontSize: 14,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          tableHeader: {
+            fontSize: 14,
+            bold: true,
+            fillColor: '#dddddd',
+            margin: [5, 5, 5, 5]
+          },
+          body: {
+            fontSize: 14,
+            bold: true,
+            margin: [5, 5, 5, 5]
+          },
+          body1: {
+            fontSize: 14,
+            bold: true,
+            fillColor: '#dddddd',
+            margin: [5, 5, 5, 5]
+          },
+          body2: {
+            fontSize: 14,
+            bold: true,
+            fillColor: '#c0c0c0',
+            margin: [5, 5, 5, 5]
+          },
+          alignRight: {
+            alignment: 'right'
+          },
+          alignRightUnderline: {
+            alignment: 'right',
+            bold: true
+          }
+        }
+      }
+      return result
+    },
+    // getReportData
+    async getReportData () {
+      let product = await this.getProduct()
+      return new Promise(resolve => {
+        let vm = this
+        console.log(vm.stockTypeOptions)
+        let result = []
+        let datatable = []
+        vm.$database.collection('po')
+          .doc(vm.inputForm['.key'])
+          .get()
+          .then(function (doc) {
+            datatable.push([
+              vm.$t('ลำดับที่'), vm.$t('ชื่อสินค้า'),
+              vm.$t('จำนวน'), vm.$t('ราคาต่อหน่วย'),
+              vm.$t('รวม')
+            ])
+            let eachProduct = vm._.find(product, {'id': doc.data().product})
+            datatable.push([
+              {text: `1`, alignment: 'left', rowSpan: 40},
+              {text: `${eachProduct.data.description}`, alignment: 'left', rowSpan: 40},
+              {text: `${doc.data().qty}`, alignment: 'center', rowSpan: 40},
+              {text: `${eachProduct.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right', rowSpan: 40},
+              {text: `${(eachProduct.price * doc.data().qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right', rowSpan: 40}
+            ])
+            for (let i = 0; i < 39; i++) {
+              datatable.push([
+                {text: ``, alignment: 'left'},
+                {text: ``, alignment: 'left'},
+                {text: ``, alignment: 'left'},
+                {text: ``, alignment: 'left'},
+                {text: ``, alignment: 'left'}
+              ])
+            }
+            datatable.push(
+              [
+                {text: `หมายเหตุ\n` + doc.data().description, alignment: 'center', colSpan: 2, rowSpan: 2},
+                {text: ``, alignment: 'left'},
+                {text: `รวมเป็นเงิน`, alignment: 'center', colSpan: 2},
+                {text: ``, alignment: 'left'},
+                {text: `${(eachProduct.price * doc.data().qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
+              ],
+              [
+                {text: ``, alignment: 'center'},
+                {text: ``, alignment: 'left'},
+                {text: `ภาษี 7%`, alignment: 'center', colSpan: 2},
+                {text: ``, alignment: 'left'},
+                {text: `${((eachProduct.price * doc.data().qty) * 0.07).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
+              ],
+              [
+                {text: `(` + vm.$ThaiBaht((eachProduct.price * doc.data().qty) * 1.07) + `)`, colSpan: 2, alignment: 'center'},
+                {text: ``, alignment: 'left'},
+                {text: `รวมเป็นเงินสุทธิ`, alignment: 'center', colSpan: 2},
+                {text: ``, alignment: 'left'},
+                {text: `${((eachProduct.price * doc.data().qty) * 1.07).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
+              ]
+            )
+            result.push(
+              {
+                text: `${vm.applicationName}`,
+                style: 'header',
+                alignment: 'center'
+              }
+            )
+            result.push(
+              {
+                text: `ใบสั่งซื้อ`,
+                style: 'header',
+                alignment: 'center'
+              }
+            )
+            let eachSupplier = vm._.find(vm.supplierOptions, {'id': doc.data().supplier})
+            let authUser = vm._.find(vm.authUserOptions, {'id': doc.data().createdBy}).label
+            result.push(
+              [{
+                text: 'วันที่ทำรายการ: ' + date.formatDate(doc.data().createdOn, 'DD/MM/YYYY'),
+                fontSize: 16,
+                alignment: 'right'
+              }],
+              [{
+                text: 'เลขที่ใบคำสั่งซื้อ: ' + doc.data().code,
+                fontSize: 16,
+                alignment: 'right'
+              }],
+              [{
+                text: 'ชื่อผู้ทำรายการ: ' + authUser,
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: 'ชื่อผู้ขาย: ' + eachSupplier.data.suppName,
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: 'ที่อยู่: ' + eachSupplier.data.suppAddress,
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: '\n รายการสินค้า',
+                fontSize: 16,
+                alignment: 'center'
+              }]
+            )
+            result.push({
+              table: {
+                headerRows: 1,
+                widths: [ 30, 280, 50, 50, 50 ],
+                body: datatable
+              }
+            })
+            result.push(
+              [{
+                text: 'หมายเหต',
+                fontSize: 16,
+                bold: true,
+                alignment: 'left'
+              }],
+              [{
+                text: '1). โปรดระบุใบสั่งซื้อข้างต้นในใบสั่งของทุกฉบับ',
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: '2). การวางบิลและรับเช็ค เป็นไปตามที่บริษัทกำหนดไว้                                               ___________________',
+                fontSize: 16,
+                alignment: 'left'
+              }],
+              [{
+                text: '3). ในการวางบิลเพื่อเรียกเก็บ ให้แนบสำเนาใบสั่งซื้อกำกับมาด้วย                                         ผู้มีอำนาจลงนาม',
+                fontSize: 16,
+                alignment: 'left'
+              }]
+            )
+            return resolve(result)
+          })
+      })
     }
   },
   // created
@@ -453,7 +700,10 @@ export default {
   },
   // computed
   computed: {
-    ...mapGetters(['userId'])
+    ...mapGetters([
+      'userId',
+      'applicationName'
+    ])
   },
   watch: {
     'inputForm.product' () {

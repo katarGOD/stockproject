@@ -12,6 +12,11 @@
     >
       <q-item-main :label="$t('ส่งคืนสินค้า')"/>
     </q-item>
+    <q-item
+      to="/return-merchandise/merchandise-report"
+    >
+      <q-item-main :label="$t('รายงานส่งคืนสินค้า')"/>
+    </q-item>
   </q-collapsible>
 </template>
 

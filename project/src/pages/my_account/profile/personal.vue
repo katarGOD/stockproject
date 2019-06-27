@@ -121,7 +121,6 @@
         >
           <q-input
             v-model="inputForm.title"
-            :disable="!hasPermission(['my-account--profile--personal--update'])"
           />
         </q-field>
         <!-- field firstName -->
@@ -133,7 +132,6 @@
         >
           <q-input
             v-model="inputForm.firstName"
-            :disable="!hasPermission(['my-account--profile--personal--update'])"
             @blur="$v.inputForm.firstName.$touch()"
           />
         </q-field>
@@ -146,7 +144,6 @@
         >
           <q-input
             v-model="inputForm.lastName"
-            :disable="!hasPermission(['my-account--profile--personal--update'])"
             @blur="$v.inputForm.lastName.$touch()"
           />
         </q-field>
@@ -159,7 +156,6 @@
         >
           <q-input
             v-model="inputForm.idCard"
-            :disable="!hasPermission(['my-account--profile--personal--update'])"
             @blur="$v.inputForm.idCard.$touch()"
           />
         </q-field>
@@ -172,27 +168,10 @@
             type="radio"
             color="secondary"
             v-model="inputForm.gender"
-            :disable="!hasPermission(['my-account--profile--personal--update'])"
             :options="[
               { label: this.$t('Male'), value: 'male' },
               { label: this.$t('Female'), value: 'female' },
               { label: this.$t('Other'), value: 'other' }
-            ]"
-          />
-        </q-field>
-        <!-- field language -->
-        <q-field
-          :label="$t('Language')"
-          :label-width="labelWidth"
-        >
-          <q-option-group
-            type="radio"
-            color="primary"
-            v-model="inputForm.language"
-            :disable="!hasPermission(['my-account--profile--personal--update'])"
-            :options="[
-              { label: this.$t('Thai'), value: 'th' },
-              { label: this.$t('English'), value: 'en-us' }
             ]"
           />
         </q-field>
@@ -201,8 +180,7 @@
           :label="$t('Birthday')"
           :label-width="labelWidth"
         >
-          <q-datetime v-model="inputForm.birthday"
-          :disable="!hasPermission(['my-account--profile--personal--update'])" type="date" />
+          <q-datetime v-model="inputForm.birthday" type="date" />
         </q-field>
         <!-- field mobilePhone -->
         <q-field
@@ -211,7 +189,6 @@
         >
           <q-input
             v-model="inputForm.mobilePhone"
-            :disable="!hasPermission(['my-account--profile--personal--update'])"
           />
         </q-field>
         <!-- field address -->
@@ -219,8 +196,7 @@
           :label="$t('Address')"
           :label-width="labelWidth"
         >
-          <q-editor v-model="inputForm.address"
-          :disable="!hasPermission(['my-account--profile--personal--update'])"/>
+          <q-editor v-model="inputForm.address"></q-editor>
         </q-field>
         <!-- submit -->
         <div class="submit">
@@ -299,22 +275,16 @@ export default {
       inputForm: {
         '.key': '',
         email: '',
-        active: false,
         photo: '',
         title: '',
         firstName: '',
         lastName: '',
         idCard: '',
         gender: '',
-        language: '',
         birthday: new Date(),
         mobilePhone: '',
         address: '',
-        authGroup: [],
-        branch: '',
-        department: '',
-        position: '',
-        reportTo: ''
+        authGroup: []
       }
     }
   },
@@ -323,10 +293,6 @@ export default {
     inputForm: {
       firstName: { required },
       lastName: { required },
-      branch: { required },
-      department: { required },
-      position: { required },
-      reportTo: { required },
       idCard: { required }
     }
   },
@@ -406,8 +372,10 @@ export default {
         modifiedBy: vm.userId,
         modifiedOn: new Date()
       }).then(function () {
-        if (vm.$isBase64(vm.inputForm.photo)) {
+        console.log(vm.$isBase64(vm.inputForm.photo))
+        if (!vm.$isBase64(vm.inputForm.photo)) {
           // save image to cloud storage
+          console.log(222)
           let folder = `profiles/${vm.$route.params.id}/`
           let fileName = 'photo'
           let fileExt = '.png'
@@ -416,6 +384,7 @@ export default {
             .then(function (snapshotPhoto) {
               snapshotPhoto.ref.getDownloadURL()
                 .then(function (downloadURL) {
+                  console.log('kuy')
                   // save photo
                   vm.$database.collection('authUser')
                     .doc(vm.$route.params.id)
@@ -423,6 +392,8 @@ export default {
                       photo: downloadURL
                     })
                 })
+            }).catch(e => {
+              console.log(e)
             })
         }
         // notify

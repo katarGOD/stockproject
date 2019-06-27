@@ -10,6 +10,7 @@
 
 <script>
 // import
+import { date } from 'quasar'
 import pdfMake from 'pdfmake/build/pdfmake'
 import { mapGetters } from 'vuex'
 import pdfFonts from 'pdfmake/build/vfs_fonts'
@@ -116,7 +117,7 @@ export default {
             docs.forEach(function (doc) {
               productCount++
               datatable.push([
-                {text: `${doc.data().createdOn}`, alignment: 'left'},
+                {text: `${date.formatDate(doc.data().createdOn, 'DD/MM/YYYY HH:mm')}`, alignment: 'left'},
                 {text: `${doc.data().createdBy}`, alignment: 'left'},
                 {text: `${doc.data().code}`, alignment: 'left'},
                 {text: `${doc.data().stockType}`, alignment: 'left'},
@@ -128,8 +129,7 @@ export default {
               ])
             })
             datatable.push([
-              {text: 'Total Product', fontSize: 16, bold: true, alignment: 'left'},
-              {text: productCount, alignment: 'right', fontSize: 16, bold: true, colSpan: 8}
+              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 9, bold: true, alignment: 'left'}
             ])
             result.push(
               {

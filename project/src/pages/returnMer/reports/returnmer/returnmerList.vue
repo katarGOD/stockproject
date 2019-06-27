@@ -10,6 +10,7 @@
 
 <script>
 // import
+import { date } from 'quasar'
 import pdfMake from 'pdfmake/build/pdfmake'
 import { mapGetters } from 'vuex'
 import pdfFonts from 'pdfmake/build/vfs_fonts'
@@ -49,7 +50,7 @@ export default {
     reportDocDefinition (reportData) {
       let result = {
         pageSize: 'A4',
-        pageOrientation: 'vertical',
+        pageOrientation: 'landscape',
         defaultStyle: {
           font: 'THSarabun'
         },
@@ -102,27 +103,28 @@ export default {
         let result = []
         let datatable = []
         let productCount = 0
-        vm.$database.collection('product')
-          .orderBy('description')
+        vm.$database.collection('returnMer')
+          .orderBy('code')
           .get()
           .then(function (docs) {
             datatable.push([
-              vm.$t('รหัสสินค้า'), vm.$t('ชื่อสินค้า'),
-              vm.$t('ราคาซื้อ'), vm.$t('ราคาขาย'),
-              vm.$t('จำนวนสินค้า')
+              vm.$t('วันเวลา'), vm.$t('ผู้ทำรายการ'),
+              vm.$t('เลขที่ใบเสร็จ'), vm.$t('สินค้า'),
+              vm.$t('Serial No'), vm.$t('ราคา')
             ])
             docs.forEach(function (doc) {
               productCount++
               datatable.push([
+                {text: `${date.formatDate(doc.data().createdOn, 'DD/MM/YYYY HH:mm')}`, alignment: 'left'},
+                {text: `${doc.data().createdBy}`, alignment: 'left'},
                 {text: `${doc.data().code}`, alignment: 'left'},
-                {text: `${doc.data().description}`, alignment: 'left'},
-                {text: `${doc.data().buyIn}`, alignment: 'left'},
-                {text: `${doc.data().buyOut}`, alignment: 'left'},
-                {text: `${doc.data().qty}`, alignment: 'left'}
+                {text: `${doc.data().product}`, alignment: 'left'},
+                {text: `${doc.data().SerialNo}`, alignment: 'left'},
+                {text: `${doc.data().price}`, alignment: 'left'}
               ])
             })
             datatable.push([
-              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 5, bold: true, alignment: 'left'}
+              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 6, bold: true, alignment: 'left'}
             ])
             result.push(
               {
@@ -141,7 +143,7 @@ export default {
             result.push({
               table: {
                 headerRows: 1,
-                widths: [ '*', '*', '*', '*', '*' ],
+                widths: [ '*', '*', '*', '*', '*', '*' ],
                 body: datatable
               },
               layout: 'headerLineOnly'
