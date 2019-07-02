@@ -78,7 +78,7 @@
         <q-btn
           flat
           :label="props.value"
-          @click="selected=[_.find(productType, {'.key': props.row['.key']})]; openUpdateFrom(inputForm, selected[0])"
+          @click="selected=[_.find(productType, {'.key': props.row.__index['.key']})]; openUpdateFrom(inputForm, selected[0])"
         />
       </q-td>
     </q-table>
@@ -89,7 +89,58 @@
       <div class="row justify-center gutter-lg">
         <div class="col-xl-4 col-lg-4 col-md-4 col-sm12 col-xs-12">
           <div class="q-headline">{{ $t($changeCase.sentenceCase($options.name)) }}</div>
-          <div class="q-subheading">{{ subHeading }}</div>
+          <div class="q-subheading">{{ subHeading }}</div><br/><br/><br/>
+          <div v-if="addProductCheck">
+            <q-list-header>{{$t('Add Product')}}</q-list-header>
+            <q-field
+              :label="$t('Product type') + ' *'"
+              :label-width="labelWidth"
+              :error="$v.productForm.productType.$error"
+              :error-label="$t('Requires non-empty data')"
+            >
+              <q-select
+                v-model="productForm.productType"
+                :options="productTypeOptions"
+                @blur="$v.productForm.productType.$touch()"
+              />
+            </q-field>
+            <q-field
+            :label="$t('Product') + ' *'"
+            :label-width="labelWidth"
+            :error="$v.productForm.product.$error"
+            :error-label="$t('Requires non-empty data')"
+          >
+            <q-select
+              v-model="productForm.product"
+              :options="productOptions"
+              @blur="$v.productForm.product.$touch()"
+            />
+          </q-field>
+          <q-field
+            :label="$t('Qty')+' *'"
+            :label-width="labelWidth"
+            :error="$v.productForm.qty.$error"
+            :error-label="`${!$v.productForm.qty.required ? $t('Requires non-empty data') : ''} ${!$v.productForm.qty.numeric ? $t('onlyNumerics') : ''}`"
+          >
+            <q-input
+              v-model="productForm.qty"
+              type="number"
+              :disable="productForm.approval === 'approval'"
+              @blur="$v.productForm.qty.$touch()"
+            />
+          </q-field>
+          <div class="submit">
+            <q-btn
+              class="q-mr-sm"
+              color="primary"
+              icon="save"
+              wait-for-ripple
+              @click="addProductForm"
+              :disable="$v.productForm.$invalid"
+              :label="$t('Save')"
+            />
+          </div>
+        </div>
         </div>
         <div class="col-xl-8 col-lg-8 col-md-8 col-sm12 col-xs-12">
           <!-- field id -->
@@ -139,32 +190,67 @@
               @blur="$v.inputForm.stockType.$touch()"
             />
           </q-field>
-          <q-field
-            :label="$t('Product type') + ' *'"
-            :label-width="labelWidth"
-            :error="$v.inputForm.productType.$error"
-            :error-label="$t('Requires non-empty data')"
+          <q-table
+            row-key=".key"
+            selection="none"
+            :columns="columnsProduct"
+            :data="withdrawProductTable"
+            :filter="filterProduct"
+            :loading="loading"
+            :pagination.sync="pagination"
+            :visible-columns="visibleColumnsProduct"
           >
-            <q-select
-              v-model="inputForm.productType"
-              :options="productTypeOptions"
-              :disable="inputForm.approval === 'approval'"
-              @blur="$v.inputForm.productType.$touch()"
+          <!-- top-right -->
+          <template slot="top" slot-scope="props">
+            <div v-if="!addProductCheck">
+              <q-btn
+                class="q-mr-sm"
+                color="primary"
+                wait-for-ripple
+                @click="addProduct"
+                :label="$t('Add Product')"
+              />
+            </div>
+            <div v-else>
+              <q-btn
+                class="q-mr-sm"
+                color="red"
+                wait-for-ripple
+                @click="hideProduct"
+                :label="$t('Hidden')"
+              />
+            </div>
+          </template>
+          <!-- custom index -->
+          <q-td slot="body-cell-index" slot-scope="props" :props="props">
+            <span small color="secondary">
+              {{ (props.row.__index) }}
+            </span>
+          </q-td>
+          <q-td slot="body-cell-product" slot-scope="props" :props="props">
+            <span small color="secondary">
+              {{ _.find(productOptions, {'id': props.row.product}).label }}
+            </span>
+          </q-td>
+          <q-td slot="body-cell-productType" slot-scope="props" :props="props">
+            <span small color="secondary">
+              {{ _.find(productTypeOptions, {'id': props.row.productType}).label }}
+            </span>
+          </q-td>
+          <q-td slot="body-cell-action" slot-scope="props" :props="props">
+            <span small color="secondary">
+              <q-btn size="xs" color="red" round icon="remove" @click="removeRow(props)" />
+            </span>
+          </q-td>
+          <!-- code -->
+          <q-td slot="body-cell-code" slot-scope="props" :props="props">
+            <q-btn
+              flat
+              :label="props.value"
+              @click="selected=[_.find(productType, {'.key': props.row['.key']})]; openUpdateFrom(inputForm, selected[0])"
             />
-          </q-field>
-          <q-field
-            :label="$t('Product') + ' *'"
-            :label-width="labelWidth"
-            :error="$v.inputForm.product.$error"
-            :error-label="$t('Requires non-empty data')"
-          >
-            <q-select
-              v-model="inputForm.product"
-              :disable="inputForm.approval === 'approval'"
-              :options="productOptions"
-              @blur="$v.inputForm.product.$touch()"
-            />
-          </q-field>
+          </q-td>
+        </q-table>
           <!-- field description -->
           <q-field
             :label="$t('Description')"
@@ -181,19 +267,6 @@
               v-model="qtyAll"
               type="number"
               disabled
-            />
-          </q-field>
-          <q-field
-            :label="$t('Qty')+' *'"
-            :label-width="labelWidth"
-            :error="$v.inputForm.qty.$error"
-            :error-label="`${!$v.inputForm.qty.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.qty.numeric ? $t('onlyNumerics') : ''}`"
-          >
-            <q-input
-              v-model="inputForm.qty"
-              type="number"
-              :disable="inputForm.approval === 'approval'"
-              @blur="$v.inputForm.qty.$touch()"
             />
           </q-field>
           <q-field
@@ -300,6 +373,11 @@ export default {
       qtyAll: 0,
       // datatable
       productAll: [],
+      addProductCheck: false,
+      withdrawProductTable: [],
+      formAction2: null,
+      filterProduct: '',
+      formModal2: false,
       pagination: {
         sortBy: 'index',
         descending: false
@@ -342,23 +420,73 @@ export default {
           align: 'left'
         }
       ],
-      visibleColumns: ['index', 'code', 'description'],
+      columnsProduct: [
+        {
+          name: 'id',
+          label: this.$t('ID'),
+          field: 'id',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'index',
+          label: this.$t('index'),
+          field: 'ss',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'productType',
+          label: this.$t('productType'),
+          field: 'productType',
+          sortable: true,
+          sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
+          align: 'left'
+        },
+        {
+          name: 'product',
+          label: this.$t('Product'),
+          field: 'product',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'qty',
+          label: this.$t('Qty'),
+          field: 'qty',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'action',
+          label: this.$t('Action'),
+          field: 'action',
+          sortable: true,
+          align: 'left'
+        }
+      ],
+      visibleColumnsProduct: ['index', 'productType', 'product', 'qty', 'action'],
+      visibleColumns: ['index', 'code', 'disciption'],
       // inputForm
       inputForm: {
         '.key': null,
         index: null,
         code: null,
         stockType: null,
-        product: null,
-        productType: null,
         description: null,
-        qty: null,
         createdBy: this.userId,
         approval: 'waiting',
         createdOn: new Date(),
         modifiedBy: this.userId,
         modifiedOn: new Date(),
         totalPrice: 0
+      },
+      productForm: {
+        '.key': null,
+        product: null,
+        productType: null,
+        withdrawId: null,
+        qty: 0
       },
       // export
       json_fields: {
@@ -381,17 +509,21 @@ export default {
     inputForm: {
       index: { required, numeric },
       code: { required },
-      productType: { required },
       stockType: { required },
-      product: { required },
-      qty: { required, numeric },
       totalPrice: { required, numeric }
+    },
+    productForm: {
+      productType: { required },
+      product: { required },
+      qty: { required, numeric }
     }
   },
   // firestore
   firestore () {
     return {
-      withdraw: this.$database.collection('withdraw')
+      withdraw: this.$database.collection('withdraw'),
+      withdrawProductDT: this.$database.collection('withdrawProduct').where('withdrawId', '==', this.inputForm['.key']),
+      withdrawProduct: this.$database.collection('withdrawProduct')
     }
   },
   // methods
@@ -402,26 +534,178 @@ export default {
       vm.inputForm.createdBy = vm.inputForm.modifiedBy = vm.userId
       vm.inputForm.createdOn = vm.inputForm.modifiedOn = new Date()
       if (vm.inputForm.approval === 'approval') {
-        await vm.updateQty(vm.inputForm.product)
+        if (vm.formAction === 'update') {
+          // await vm.updateQty(vm.inputForm.product)
+        }
       }
-      result = await vm.addProcess(vm.$firestore.withdraw, vm.inputForm, vm.$v.inputForm)
+      result = await vm.addProductProcess(vm.$firestore.withdraw, vm.inputForm, vm.$v.inputForm)
       console.log(result)
+    },
+    addProductProcess (collection, inputForm, validate) {
+      return new Promise(resolve => {
+        let vm = this
+        if (validate.$invalid) {
+        // validate false
+          vm.$q.notify({
+            message: vm.$t('Form validation error'),
+            type: 'nagative',
+            icon: 'error_outline'
+          })
+        } else {
+          // validate : true
+          let value = {}
+          for (var field in inputForm) {
+            if (field !== '.key') {
+              if (inputForm.hasOwnProperty(field)) {
+                value[field] = inputForm[field]
+              }
+            }
+          }
+          // add to collection
+          collection.add(value).then(function (docRef) {
+            vm.loadingState(collection).then((result) => {
+              [vm.collectionSize, vm.loading] = result
+              vm.withdrawProductTable.forEach(wdProduct => {
+                vm.$database.collection('withdrawProduct').add({
+                  product: wdProduct.product,
+                  productType: wdProduct.productType,
+                  qty: wdProduct.qty,
+                  withdrawId: docRef.id
+                })
+              })
+              vm.formModal = false
+              vm.initialInputForm(inputForm)
+              // notify
+              vm.$q.notify({
+                message: vm.$t('Form submitted successfully'),
+                type: 'positive',
+                icon: 'info'
+              })
+              return resolve(docRef.id)
+            })
+          }).catch(function (error) {
+            vm.$q.notify({
+              message: vm.$t('Error writing document'),
+              type: 'nagative',
+              icon: 'error_outline'
+            })
+            console.error('Error writing document: ', error)
+            return resolve('')
+          })
+        }
+      })
+    },
+    async addProductForm () {
+      let vm = this
+      let result = ''
+      if (vm.formAction === 'update') {
+        vm.productForm.withdrawId = vm.inputForm['.key']
+        result = await vm.addProcessProduct(vm.$firestore.withdrawProduct, vm.productForm, vm.$v.productForm)
+        console.log(result)
+      } else {
+        vm.withdrawProductTable.push({
+          id: '222',
+          product: vm.productForm.product,
+          productType: vm.productForm.productType,
+          qty: vm.productForm.qty
+        })
+      }
+    },
+    addProcessProduct (collection, inputForm, validate) {
+      return new Promise(resolve => {
+        let vm = this
+        if (validate.$invalid) {
+        // validate false
+          vm.$q.notify({
+            message: vm.$t('Form validation error'),
+            type: 'nagative',
+            icon: 'error_outline'
+          })
+        } else {
+          // validate : true
+          let value = {}
+          for (var field in inputForm) {
+            if (field !== '.key') {
+              if (inputForm.hasOwnProperty(field)) {
+                value[field] = inputForm[field]
+              }
+            }
+          }
+          // add to collection
+          collection.add(value).then(function (docRef) {
+            vm.loadingState(collection).then((result) => {
+              [vm.collectionSize, vm.loading] = result
+              vm.initialProductForm(inputForm)
+              vm.getWithdrawProduct(vm.inputForm['.key'])
+              // notify
+              vm.$q.notify({
+                message: vm.$t('Form submitted successfully'),
+                type: 'positive',
+                icon: 'info'
+              })
+              return resolve(docRef.id)
+            })
+          }).catch(function (error) {
+            vm.$q.notify({
+              message: vm.$t('Error writing document'),
+              type: 'nagative',
+              icon: 'error_outline'
+            })
+            console.error('Error writing document: ', error)
+            return resolve('')
+          })
+        }
+      })
+    },
+    async addProduct () {
+      console.log(this.withdrawProductTable)
+      this.addProductCheck = true
+    },
+    hideProduct () {
+      this.addProductCheck = false
+    },
+    removeRow (row) {
+      let vm = this
+      console.log(row.row.id)
+      return new Promise(resolve => {
+        if (vm.formAction === 'update') {
+          vm.$database.collection('withdrawProduct').doc(row.row.id).delete()
+            .then(async function () {
+              await vm.getWithdrawProduct(vm.inputForm['.key'])
+              console.log('delete succes')
+            })
+            // error
+            .catch((error) => {
+              console.error('Error removing document: ', error)
+            })
+        }
+        return resolve(true)
+      })
     },
     openAddFormModel (inputForm) {
       let vm = this
       vm.subHeading = vm.$t('Add')
       vm.formAction = 'add'
       vm.initialInputFormModel()
+      vm.initialProductForm()
+      vm.withdrawProductTable = []
       vm.formModal = true
+    },
+    openAddProduct () {
+      let vm = this
+      vm.subHeading = vm.$t('Add')
+      vm.formAction2 = 'add'
+      vm.initialProductForm()
+      vm.formModal2 = true
     },
     initialInputFormModel () {
       let vm = this
+      vm.addProductCheck = false
+      vm.initialProductForm()
       vm.inputForm['.key'] = null
       vm.inputForm.index = null
       vm.inputForm.code = null
       vm.inputForm.stockType = null
-      vm.inputForm.product = null
-      vm.inputForm.productType = null
       vm.inputForm.description = null
       vm.inputForm.qty = null
       vm.inputForm.createdBy = this.userId
@@ -431,6 +715,13 @@ export default {
       vm.inputForm.modifiedOn = new Date()
       vm.inputForm.totalPrice = 0
     },
+    initialProductForm () {
+      let vm = this
+      vm.productForm['.key'] = null
+      vm.productForm.product = null
+      vm.productForm.productType = null
+      vm.wihtdrawId = null
+    },
     async updateForm () {
       let vm = this
       let withdraw = await vm.getWithdraw()
@@ -438,17 +729,49 @@ export default {
       vm.inputForm.modifiedOn = new Date()
       console.log(withdraw)
       console.log(vm._.find(withdraw, {'id': vm.inputForm['.key']}).approval)
-      if (vm._.find(withdraw, {'id': vm.inputForm['.key']}).approval === 'waiting') {
-        if (vm.inputForm.approval === 'approval') {
-          await vm.updateQty(vm.inputForm.product)
-        }
-      }
+      // if (vm._.find(withdraw, {'id': vm.inputForm['.key']}).approval === 'waiting') {
+      //   if (vm.inputForm.approval === 'approval') {
+      //     await vm.updateQty(vm.inputForm.product)
+      //   }
+      // }
       await vm.updateProcess(vm.$firestore.withdraw, vm.inputForm, vm.$v.inputForm)
     },
     async deleteRow () {
       let vm = this
       await vm.deleteProcess(vm.selected, vm.$firestore.withdraw)
       vm.selected = []
+    },
+    getWithdrawProduct (withdrawId) {
+      return new Promise(resolve => {
+        let vm = this
+        let rowCount = 1
+        vm.withdrawProductTable = []
+        console.log(vm.selected.length)
+        if (vm.formAction === 'update' || (vm.selected.length > 0)) {
+          vm.$database.collection('withdrawProduct')
+            .where('withdrawId', '==', withdrawId)
+            .get()
+            .then(docs => {
+              console.log(docs)
+              docs.forEach(doc => {
+                vm.withdrawProductTable.push({
+                  id: doc.id,
+                  data: doc.data(),
+                  index: rowCount,
+                  product: doc.data().product,
+                  productType: doc.data().productType,
+                  qty: doc.data().qty,
+                  withdrawId: doc.data().withdrawId
+                })
+                rowCount++
+              })
+              return resolve(vm.withdrawProductTable)
+            }).catch(err => {
+              console.log(err)
+            })
+          return resolve(vm.withdrawProductTable)
+        }
+      })
     },
     createExportData () {
       let vm = this
@@ -716,6 +1039,9 @@ export default {
         let qty = vm._.find(vm.productAll, {'id': vm.inputForm.product}).qty
         vm.qtyAll = qty
       }
+    },
+    async 'selected' () {
+      await this.getWithdrawProduct(this.selected[0]['.key'])
     }
   }
 }
