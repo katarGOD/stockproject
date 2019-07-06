@@ -356,7 +356,7 @@ pdfMake.fonts = {
   }
 }
 export default {
-  name: 'Purchase Order',
+  name: 'Withdraw',
   // mixins
   mixins: [
     crudProcess,
@@ -466,7 +466,7 @@ export default {
         }
       ],
       visibleColumnsProduct: ['index', 'productType', 'product', 'qty', 'action'],
-      visibleColumns: ['index', 'code', 'disciption'],
+      visibleColumns: ['index', 'code', 'description'],
       // inputForm
       inputForm: {
         '.key': null,
@@ -824,6 +824,27 @@ export default {
         })
       })
     },
+    getProductList (wihtdrawId) {
+      let vm = this
+      let result = []
+      return new Promise(resolve => {
+        vm.$database.collection('withdrawProduct')
+          .where('withdrawId', '==', wihtdrawId)
+          .get().then(docs => {
+            console.log(docs)
+            docs.forEach(doc => {
+              result.push({
+                id: doc.id,
+                product: doc.data().product,
+                data: doc.data(),
+                qty: doc.data().qty
+              })
+            })
+            console.log(result)
+            return resolve(result)
+          })
+      })
+    },
     updateQty (idProduct) {
       let vm = this
       return new Promise(resolve => {
@@ -904,12 +925,13 @@ export default {
     },
     // getReportData
     async getReportData () {
-      let product = await this.getProduct()
-      console.log(product)
+      let productList = await this.getProductList(this.inputForm['.key'])
+      console.log(productList)
       return new Promise(resolve => {
         let vm = this
         let result = []
         let datatable = []
+        console.log(productList)
         vm.$database.collection('withdraw')
           .doc(vm.inputForm['.key'])
           .get()
@@ -921,22 +943,26 @@ export default {
               vm.$t('รวม')
             ])
             console.log(doc.data())
-            let eachProduct = vm._.find(product, {'id': doc.data().product})
-            let eachStockTypeOption = vm._.find(vm.stockTypeOptions, {'id': doc.data().stockType})
-            console.log(eachStockTypeOption)
-            datatable.push([
-              {text: `1`, alignment: 'left', rowSpan: 40},
-              {text: `${eachProduct.data.description}`, alignment: 'left', rowSpan: 40},
-              {text: `${doc.data().qty}`, alignment: 'center', rowSpan: 40},
-              {text: `${eachStockTypeOption.data.code}`, alignment: 'center', rowSpan: 40},
-              {text: `${doc.data().qty}`, alignment: 'center', rowSpan: 40}
-            ])
+            let rowCount = 1
+            let productCount = 0
+            productList.forEach(eachProduct => {
+              productCount += eachProduct.qty
+              datatable.push([
+                {text: rowCount, alignment: 'center', border: [true, false, true, false]},
+                {text: `${vm._.find(vm.productOptions, {'id': eachProduct.product}).data.description}`, alignment: 'left', border: [true, false, true, false]},
+                {text: `${eachProduct.qty}`, alignment: 'center', border: [true, false, true, false]},
+                {text: `${vm._.find(vm.stockTypeOptions, {'id': vm._.find(vm.productOptions, {'id': eachProduct.product}).data.stockType}).data.code}`, alignment: 'center', border: [true, false, true, false]},
+                {text: `${productCount}`, alignment: 'center', border: [true, false, true, false]}
+              ])
+              rowCount++
+            })
             for (let i = 0; i < 39; i++) {
               datatable.push([
-                {text: ``, alignment: 'left'},
-                {text: ``, alignment: 'left'},
-                {text: ``, alignment: 'left'},
-                {text: ``, alignment: 'left'}
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]}
               ])
             }
             datatable.push(

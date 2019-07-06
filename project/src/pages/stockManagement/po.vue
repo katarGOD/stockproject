@@ -89,7 +89,58 @@
       <div class="row justify-center gutter-lg">
         <div class="col-xl-4 col-lg-4 col-md-4 col-sm12 col-xs-12">
           <div class="q-headline">{{ $t($changeCase.sentenceCase($options.name)) }}</div>
-          <div class="q-subheading">{{ subHeading }}</div>
+          <div class="q-subheading">{{ subHeading }}</div><br/><br/><br/>
+          <div v-if="addProductCheck">
+            <q-list-header>{{$t('Add Product')}}</q-list-header>
+            <q-field
+              :label="$t('Product type') + ' *'"
+              :label-width="labelWidth"
+              :error="$v.productForm.productType.$error"
+              :error-label="$t('Requires non-empty data')"
+            >
+              <q-select
+                v-model="productForm.productType"
+                :options="productTypeOptions"
+                @blur="$v.productForm.productType.$touch()"
+              />
+            </q-field>
+            <q-field
+            :label="$t('Product') + ' *'"
+            :label-width="labelWidth"
+            :error="$v.productForm.product.$error"
+            :error-label="$t('Requires non-empty data')"
+          >
+            <q-select
+              v-model="productForm.product"
+              :options="productOptions"
+              @blur="$v.productForm.product.$touch()"
+            />
+          </q-field>
+          <q-field
+            :label="$t('Qty')+' *'"
+            :label-width="labelWidth"
+            :error="$v.productForm.qty.$error"
+            :error-label="`${!$v.productForm.qty.required ? $t('Requires non-empty data') : ''} ${!$v.productForm.qty.numeric ? $t('onlyNumerics') : ''}`"
+          >
+            <q-input
+              v-model="productForm.qty"
+              type="number"
+              :disable="productForm.approval === 'approval'"
+              @blur="$v.productForm.qty.$touch()"
+            />
+          </q-field>
+          <div class="submit">
+            <q-btn
+              class="q-mr-sm"
+              color="primary"
+              icon="save"
+              wait-for-ripple
+              @click="addProductForm"
+              :disable="$v.productForm.$invalid"
+              :label="$t('Save')"
+            />
+          </div>
+        </div>
         </div>
         <div class="col-xl-8 col-lg-8 col-md-8 col-sm12 col-xs-12">
           <!-- field id -->
@@ -125,7 +176,7 @@
             />
           </q-field>
           <q-field
-            :label="$t('Stock type') + ' *'"
+            :label="$t('Stock Type') + ' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.stockType.$error"
             :error-label="$t('Requires non-empty data')"
@@ -137,7 +188,7 @@
             />
           </q-field>
           <q-field
-            :label="$t('Product type') + ' *'"
+            :label="$t('Product Type') + ' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.productType.$error"
             :error-label="$t('Requires non-empty data')"
@@ -166,18 +217,72 @@
           >
             <q-input v-model="inputForm.description"/>
           </q-field>
-          <q-field
-            :label="$t('Product') + ' *'"
-            :label-width="labelWidth"
-            :error="$v.inputForm.product.$error"
-            :error-label="$t('Requires non-empty data')"
+          <q-table
+            row-key=".key"
+            selection="none"
+            :columns="columnsProduct"
+            :data="poProductTable"
+            :filter="filterProduct"
+            :loading="loading"
+            :pagination.sync="pagination"
+            :visible-columns="visibleColumnsProduct"
           >
-            <q-select
-              v-model="inputForm.product"
-              :options="productOptions"
-              @blur="$v.inputForm.product.$touch()"
+          <!-- top-right -->
+          <template slot="top" slot-scope="props">
+            <div v-if="!addProductCheck">
+              <q-btn
+                class="q-mr-sm"
+                color="primary"
+                wait-for-ripple
+                @click="addProduct"
+                :label="$t('Add Product')"
+              />
+            </div>
+            <div v-else>
+              <q-btn
+                class="q-mr-sm"
+                color="red"
+                wait-for-ripple
+                @click="hideProduct"
+                :label="$t('Hidden')"
+              />
+            </div>
+          </template>
+          <!-- custom index -->
+          <q-td slot="body-cell-index" slot-scope="props" :props="props">
+            <span small color="secondary">
+              {{ (props.row.__index) }}
+            </span>
+          </q-td>
+          <q-td slot="body-cell-product" slot-scope="props" :props="props">
+            <span small color="secondary">
+              {{ _.find(productOptions, {'id': props.row.product}).label }}
+            </span>
+          </q-td>
+          <q-td slot="body-cell-productType" slot-scope="props" :props="props">
+            <span small color="secondary">
+              {{ _.find(productTypeOptions, {'id': props.row.productType}).label }}
+            </span>
+          </q-td>
+          <q-td slot="body-cell-price" slot-scope="props" :props="props">
+            <span small color="secondary">
+              {{ _.find(productOptions, {'id': props.row.product}).data.buyIn }}
+            </span>
+          </q-td>
+          <q-td slot="body-cell-action" slot-scope="props" :props="props">
+            <span small color="secondary">
+              <q-btn size="xs" color="red" round icon="remove" @click="removeRow(props)" />
+            </span>
+          </q-td>
+          <!-- code -->
+          <q-td slot="body-cell-code" slot-scope="props" :props="props">
+            <q-btn
+              flat
+              :label="props.value"
+              @click="selected=[_.find(productType, {'.key': props.row['.key']})]; openUpdateFrom(inputForm, selected[0])"
             />
-          </q-field>
+          </q-td>
+        </q-table>
           <!-- field description -->
           <q-field
             :label="$t('Qty')+' *'"
@@ -309,6 +414,11 @@ export default {
     return {
       // datatable
       productAll: [],
+      addProductCheck: false,
+      poProductTable: [],
+      formAction2: null,
+      filterProduct: '',
+      formModal2: false,
       pagination: {
         sortBy: 'index',
         descending: false
@@ -351,6 +461,59 @@ export default {
           align: 'left'
         }
       ],
+      columnsProduct: [
+        {
+          name: 'id',
+          label: this.$t('ID'),
+          field: 'id',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'index',
+          label: this.$t('index'),
+          field: 'ss',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'productType',
+          label: this.$t('productType'),
+          field: 'productType',
+          sortable: true,
+          sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
+          align: 'left'
+        },
+        {
+          name: 'product',
+          label: this.$t('Product'),
+          field: 'product',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'qty',
+          label: this.$t('Qty'),
+          field: 'qty',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'price',
+          label: this.$t('Price/Unit'),
+          field: 'price',
+          sortable: true,
+          align: 'left'
+        },
+        {
+          name: 'action',
+          label: this.$t('Action'),
+          field: 'action',
+          sortable: true,
+          align: 'left'
+        }
+      ],
+      visibleColumnsProduct: ['index', 'productType', 'product', 'qty', 'price', 'action'],
       visibleColumns: ['index', 'code', 'description'],
       // inputForm
       inputForm: {
@@ -359,7 +522,6 @@ export default {
         code: null,
         stockType: null,
         supplier: null,
-        product: null,
         productType: null,
         description: null,
         qty: null,
@@ -369,6 +531,13 @@ export default {
         modifiedBy: this.userId,
         modifiedOn: new Date(),
         totalPrice: 0
+      },
+      productForm: {
+        '.key': null,
+        product: null,
+        productType: null,
+        poId: null,
+        qty: 0
       },
       // export
       json_fields: {
@@ -394,15 +563,21 @@ export default {
       productType: { required },
       supplier: { required },
       stockType: { required },
-      product: { required },
       qty: { required, numeric },
       totalPrice: { required, numeric }
+    },
+    productForm: {
+      productType: { required },
+      product: { required },
+      qty: { required, numeric }
     }
   },
   // firestore
   firestore () {
     return {
-      po: this.$database.collection('po')
+      po: this.$database.collection('po'),
+      poProductDT: this.$database.collection('poProduct').where('poId', '==', this.inputForm['.key']),
+      poProduct: this.$database.collection('poProduct')
     }
   },
   // methods
@@ -412,7 +587,12 @@ export default {
       let result = ''
       vm.inputForm.createdBy = vm.inputForm.modifiedBy = vm.userId
       vm.inputForm.createdOn = vm.inputForm.modifiedOn = new Date()
-      result = await vm.addProcess(vm.$firestore.po, vm.inputForm, vm.$v.inputForm)
+      if (vm.inputForm.approval === 'approval') {
+        if (vm.formAction === 'update') {
+          // await vm.updateQty(vm.inputForm.product)
+        }
+      }
+      result = await vm.addProductProcess(vm.$firestore.po, vm.inputForm, vm.$v.inputForm)
       console.log(result)
     },
     openAddFormModel (inputForm) {
@@ -420,15 +600,18 @@ export default {
       vm.subHeading = vm.$t('Add')
       vm.formAction = 'add'
       vm.initialInputFormModel()
+      vm.initialProductForm()
+      vm.poProductTable = []
       vm.formModal = true
     },
     initialInputFormModel () {
       let vm = this
+      vm.addProductCheck = false
+      vm.initialProductForm()
       vm.inputForm['.key'] = null
       vm.inputForm.index = null
       vm.inputForm.code = null
       vm.inputForm.stockType = null
-      vm.inputForm.product = null
       vm.inputForm.productType = null
       vm.inputForm.description = null
       vm.inputForm.qty = null
@@ -438,6 +621,180 @@ export default {
       vm.inputForm.modifiedBy = this.userId
       vm.inputForm.modifiedOn = new Date()
       vm.inputForm.totalPrice = 0
+    },
+    initialProductForm () {
+      let vm = this
+      vm.productForm['.key'] = null
+      vm.productForm.product = null
+      vm.productForm.productType = null
+      vm.poId = null
+    },
+    getPo () {
+      let vm = this
+      let result = []
+      return new Promise(resolve => {
+        vm.$database.collection('po').get().then(docs => {
+          console.log(docs)
+          docs.forEach(doc => {
+            result.push({
+              id: doc.id,
+              approval: doc.data().approval,
+              data: doc.data()
+            })
+          })
+          console.log(result)
+          return resolve(result)
+        })
+      })
+    },
+    getPoProduct (poId) {
+      return new Promise(resolve => {
+        let vm = this
+        let rowCount = 1
+        vm.poProductTable = []
+        console.log(vm.selected.length)
+        if (vm.formAction === 'update' || (vm.selected.length > 0)) {
+          vm.$database.collection('poProduct')
+            .where('poId', '==', poId)
+            .get()
+            .then(docs => {
+              console.log(docs)
+              docs.forEach(doc => {
+                vm.poProductTable.push({
+                  id: doc.id,
+                  data: doc.data(),
+                  index: rowCount,
+                  product: doc.data().product,
+                  productType: doc.data().productType,
+                  qty: doc.data().qty,
+                  poId: doc.data().poId
+                })
+                rowCount++
+              })
+              return resolve(vm.poProductTable)
+            }).catch(err => {
+              console.log(err)
+            })
+          return resolve(vm.poProductTable)
+        }
+      })
+    },
+    addProductProcess (collection, inputForm, validate) {
+      return new Promise(resolve => {
+        let vm = this
+        if (validate.$invalid) {
+        // validate false
+          vm.$q.notify({
+            message: vm.$t('Form validation error'),
+            type: 'nagative',
+            icon: 'error_outline'
+          })
+        } else {
+          // validate : true
+          let value = {}
+          for (var field in inputForm) {
+            if (field !== '.key') {
+              if (inputForm.hasOwnProperty(field)) {
+                value[field] = inputForm[field]
+              }
+            }
+          }
+          console.log(value)
+          // add to collection
+          collection.add(value).then(function (docRef) {
+            vm.loadingState(collection).then((result) => {
+              [vm.collectionSize, vm.loading] = result
+              vm.poProductTable.forEach(poProduct => {
+                vm.$database.collection('poProduct').add({
+                  product: poProduct.product,
+                  productType: poProduct.productType,
+                  qty: poProduct.qty,
+                  poId: docRef.id
+                })
+              })
+              vm.formModal = false
+              vm.initialInputForm(inputForm)
+              // notify
+              vm.$q.notify({
+                message: vm.$t('Form submitted successfully'),
+                type: 'positive',
+                icon: 'info'
+              })
+              return resolve(docRef.id)
+            })
+          }).catch(function (error) {
+            vm.$q.notify({
+              message: vm.$t('Error writing document'),
+              type: 'nagative',
+              icon: 'error_outline'
+            })
+            console.error('Error writing document: ', error)
+            return resolve('')
+          })
+        }
+      })
+    },
+    async addProductForm () {
+      let vm = this
+      let result = ''
+      if (vm.formAction === 'update') {
+        vm.productForm.poId = vm.inputForm['.key']
+        result = await vm.addProcessProduct(vm.$firestore.poProduct, vm.productForm, vm.$v.productForm)
+        console.log(result)
+      } else {
+        vm.poProductTable.push({
+          id: '222',
+          product: vm.productForm.product,
+          productType: vm.productForm.productType,
+          qty: vm.productForm.qty
+        })
+      }
+    },
+    addProcessProduct (collection, inputForm, validate) {
+      return new Promise(resolve => {
+        let vm = this
+        if (validate.$invalid) {
+        // validate false
+          vm.$q.notify({
+            message: vm.$t('Form validation error'),
+            type: 'nagative',
+            icon: 'error_outline'
+          })
+        } else {
+          // validate : true
+          let value = {}
+          for (var field in inputForm) {
+            if (field !== '.key') {
+              if (inputForm.hasOwnProperty(field)) {
+                value[field] = inputForm[field]
+              }
+            }
+          }
+          // add to collection
+          collection.add(value).then(function (docRef) {
+            vm.loadingState(collection).then((result) => {
+              [vm.collectionSize, vm.loading] = result
+              vm.initialProductForm(inputForm)
+              vm.getPoProduct(vm.inputForm['.key'])
+              // notify
+              vm.$q.notify({
+                message: vm.$t('Form submitted successfully'),
+                type: 'positive',
+                icon: 'info'
+              })
+              return resolve(docRef.id)
+            })
+          }).catch(function (error) {
+            vm.$q.notify({
+              message: vm.$t('Error writing document'),
+              type: 'nagative',
+              icon: 'error_outline'
+            })
+            console.error('Error writing document: ', error)
+            return resolve('')
+          })
+        }
+      })
     },
     async updateForm () {
       let vm = this
@@ -463,6 +820,34 @@ export default {
             })
           })
         })
+    },
+    getProductList (poId) {
+      let vm = this
+      let result = []
+      return new Promise(resolve => {
+        vm.$database.collection('poProduct')
+          .where('poId', '==', poId)
+          .get().then(docs => {
+            console.log(docs)
+            docs.forEach(doc => {
+              result.push({
+                id: doc.id,
+                product: doc.data().product,
+                data: doc.data(),
+                qty: doc.data().qty
+              })
+            })
+            console.log(result)
+            return resolve(result)
+          })
+      })
+    },
+    async addProduct () {
+      console.log(this.poProductTable)
+      this.addProductCheck = true
+    },
+    hideProduct () {
+      this.addProductCheck = false
     },
     getProduct () {
       let vm = this
@@ -552,7 +937,8 @@ export default {
     },
     // getReportData
     async getReportData () {
-      let product = await this.getProduct()
+      // let product = await this.getProduct()
+      let productList = await this.getProductList(this.inputForm['.key'])
       return new Promise(resolve => {
         let vm = this
         console.log(vm.stockTypeOptions)
@@ -567,21 +953,28 @@ export default {
               vm.$t('จำนวน'), vm.$t('ราคาต่อหน่วย'),
               vm.$t('รวม')
             ])
-            let eachProduct = vm._.find(product, {'id': doc.data().product})
-            datatable.push([
-              {text: `1`, alignment: 'left', rowSpan: 40},
-              {text: `${eachProduct.data.description}`, alignment: 'left', rowSpan: 40},
-              {text: `${doc.data().qty}`, alignment: 'center', rowSpan: 40},
-              {text: `${eachProduct.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right', rowSpan: 40},
-              {text: `${(eachProduct.price * doc.data().qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right', rowSpan: 40}
-            ])
+            let rowCount = 1
+            let productTotal = 0
+            let productPrice = 0
+            productList.forEach(eachProduct => {
+              productPrice = vm._.find(vm.productOptions, {'id': eachProduct.product}).data.buyIn
+              productTotal += (vm._.find(vm.productOptions, {'id': eachProduct.product}).data.buyIn * eachProduct.qty)
+              datatable.push([
+                {text: rowCount, alignment: 'center', border: [true, false, true, false]},
+                {text: `${vm._.find(vm.productOptions, {'id': eachProduct.product}).data.description}`, alignment: 'left', border: [true, false, true, false]},
+                {text: `${eachProduct.qty}`, alignment: 'center', border: [true, false, true, false]},
+                {text: `${productPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right', border: [true, false, true, false]},
+                {text: `${(productPrice * eachProduct.qty)}`, alignment: 'center', border: [true, false, true, false]}
+              ])
+              rowCount++
+            })
             for (let i = 0; i < 39; i++) {
               datatable.push([
-                {text: ``, alignment: 'left'},
-                {text: ``, alignment: 'left'},
-                {text: ``, alignment: 'left'},
-                {text: ``, alignment: 'left'},
-                {text: ``, alignment: 'left'}
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]},
+                {text: ``, alignment: 'left', border: [true, false, true, false]}
               ])
             }
             datatable.push(
@@ -590,21 +983,21 @@ export default {
                 {text: ``, alignment: 'left'},
                 {text: `รวมเป็นเงิน`, alignment: 'center', colSpan: 2},
                 {text: ``, alignment: 'left'},
-                {text: `${(eachProduct.price * doc.data().qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
+                {text: `${(productTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
               ],
               [
                 {text: ``, alignment: 'center'},
                 {text: ``, alignment: 'left'},
                 {text: `ภาษี 7%`, alignment: 'center', colSpan: 2},
                 {text: ``, alignment: 'left'},
-                {text: `${((eachProduct.price * doc.data().qty) * 0.07).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
+                {text: `${((productTotal) * 0.07).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
               ],
               [
-                {text: `(` + vm.$ThaiBaht((eachProduct.price * doc.data().qty) * 1.07) + `)`, colSpan: 2, alignment: 'center'},
+                {text: `(` + vm.$ThaiBaht((productTotal) * 1.07) + `)`, colSpan: 2, alignment: 'center'},
                 {text: ``, alignment: 'left'},
                 {text: `รวมเป็นเงินสุทธิ`, alignment: 'center', colSpan: 2},
                 {text: ``, alignment: 'left'},
-                {text: `${((eachProduct.price * doc.data().qty) * 1.07).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
+                {text: `${((productTotal) * 1.07).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right'}
               ]
             )
             result.push(
@@ -725,6 +1118,9 @@ export default {
         total = price * vm.inputForm.qty
         vm.inputForm.totalPrice = total
       }
+    },
+    async 'selected' () {
+      await this.getPoProduct(this.selected[0]['.key'])
     }
   }
 }

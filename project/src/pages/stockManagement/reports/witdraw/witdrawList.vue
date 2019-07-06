@@ -129,7 +129,7 @@ export default {
               ])
             })
             datatable.push([
-              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 9, bold: true, alignment: 'left'}
+              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 9, bold: true, alignment: 'right'}
             ])
             result.push(
               {

@@ -13,7 +13,7 @@
           </q-item-tile>
         </q-item-main>
       </q-item>
-      <q-item to="/product-management/product-report/product-list">
+      <q-item to="/product-management/product-report/product-low-list">
         <q-item-main>
           <q-item-tile label>
             {{ $t('2) รายงานสินค้าคงคลังไกล้หมด') }}

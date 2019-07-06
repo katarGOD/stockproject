@@ -206,6 +206,10 @@ export default [
               { path: 'product-list',
                 component: () => import('pages/productManagement/reports/product/productList'),
                 beforeEnter: (to, from, next) => requiresLogin(next)
+              },
+              { path: 'product-low-list',
+                component: () => import('pages/productManagement/reports/product/productLowList'),
+                beforeEnter: (to, from, next) => requiresLogin(next)
               }
             ]
           }
