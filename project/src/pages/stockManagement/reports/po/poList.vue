@@ -17,6 +17,10 @@ import pdfFonts from 'pdfmake/build/vfs_fonts'
 import departmentOptions from 'src/components/options/departmentOptions'
 import positionOptions from 'src/components/options/positionOptions'
 import teamCalendarOptions from 'src/components/options/teamCalendarOptions'
+import authUserOptions from 'src/components/options/authUserOptions'
+import productOptions from 'src/components/options/productOptions'
+import stockTypeOptions from 'src/components/options/stockTypeOptions'
+import productTypeOptions from 'src/components/options/productTypeOptions'
 
 // pdfMake
 pdfMake.vfs = pdfFonts.pdfMake.vfs
@@ -36,7 +40,11 @@ export default {
   mixins: [
     departmentOptions,
     positionOptions,
-    teamCalendarOptions
+    teamCalendarOptions,
+    authUserOptions,
+    productOptions,
+    stockTypeOptions,
+    productTypeOptions
   ],
   data () {
     return {
@@ -96,8 +104,29 @@ export default {
       }
       return result
     },
+    getProductList () {
+      let vm = this
+      let result = []
+      let totalQty = 0
+      return new Promise(resolve => {
+        vm.$database.collection('poProduct')
+          .get().then(docs => {
+            docs.forEach(doc => {
+              totalQty++
+              result.push({
+                totalQty: totalQty,
+                totalPrice: vm._.find(vm.productOptions, {'id': doc.data().product}).data.buyIn,
+                poId: doc.data().poId
+              })
+            })
+            console.log(result)
+            return resolve(result)
+          })
+      })
+    },
     // making report data
-    getPoList () {
+    async getPoList () {
+      let productSum = await this.getProductList()
       return new Promise(resolve => {
         let vm = this
         let result = []
@@ -109,29 +138,34 @@ export default {
           .then(function (docs) {
             datatable.push([
               vm.$t('วันเวลา'), vm.$t('ผู้ทำรายการ'),
-              vm.$t('รหัสสินค้า'), vm.$t('หมวดหมู่อุปกรณ์'),
-              vm.$t('ประเภทอุปกรณ์'),
-              vm.$t('สินค้า'), vm.$t('จำนวน'),
+              vm.$t('รหัสใบเสร็จ'), vm.$t('จำนวน'),
               vm.$t('ราคารวม'), vm.$t('รายละเอียด'),
               vm.$t('สถานะการอนุมัติ')
             ])
             docs.forEach(function (doc) {
+              let createdBy = vm._.find(vm.authUserOptions, {'id': doc.data().createdBy}).label
+              let totalQty = 0
+              let totalPrice = 0
+              let productList = vm._.filter(productSum, {'poId': doc.id}) ? vm._.filter(productSum, {'poId': doc.id}) : []
+              if (productList.length) {
+                productList.forEach(eachProduct => {
+                  totalQty++
+                  totalPrice += eachProduct.totalPrice
+                })
+              }
               productCount++
               datatable.push([
                 {text: `${date.formatDate(doc.data().createdOn, 'DD/MM/YYYY HH:mm')}`, alignment: 'left'},
-                {text: `${doc.data().createdBy}`, alignment: 'left'},
+                {text: `${createdBy}`, alignment: 'left'},
                 {text: `${doc.data().code}`, alignment: 'left'},
-                {text: `${doc.data().stockType}`, alignment: 'left'},
-                {text: `${doc.data().productType}`, alignment: 'left'},
-                {text: `${doc.data().product}`, alignment: 'left'},
-                {text: `${doc.data().qty}`, alignment: 'left'},
-                {text: `${doc.data().totalPrice}`, alignment: 'left'},
+                {text: `${totalQty}`, alignment: 'left'},
+                {text: `${totalPrice}`, alignment: 'left'},
                 {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().approval}`, alignment: 'left'}
               ])
             })
             datatable.push([
-              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 10, bold: true, alignment: 'right'}
+              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 7, bold: true, alignment: 'right'}
             ])
             result.push(
               {
@@ -150,7 +184,7 @@ export default {
             result.push({
               table: {
                 headerRows: 1,
-                widths: [ 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto' ],
+                widths: [ '*', '*', '*', '*', '*', '*', '*' ],
                 body: datatable
               },
               layout: 'headerLineOnly'

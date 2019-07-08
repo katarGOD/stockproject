@@ -17,6 +17,10 @@ import pdfFonts from 'pdfmake/build/vfs_fonts'
 import departmentOptions from 'src/components/options/departmentOptions'
 import positionOptions from 'src/components/options/positionOptions'
 import teamCalendarOptions from 'src/components/options/teamCalendarOptions'
+import authUserOptions from 'src/components/options/authUserOptions'
+import productOptions from 'src/components/options/productOptions'
+import stockTypeOptions from 'src/components/options/stockTypeOptions'
+import productTypeOptions from 'src/components/options/productTypeOptions'
 
 // pdfMake
 pdfMake.vfs = pdfFonts.pdfMake.vfs
@@ -36,7 +40,11 @@ export default {
   mixins: [
     departmentOptions,
     positionOptions,
-    teamCalendarOptions
+    teamCalendarOptions,
+    authUserOptions,
+    productOptions,
+    stockTypeOptions,
+    productTypeOptions
   ],
   data () {
     return {
@@ -115,14 +123,18 @@ export default {
               vm.$t('รายละเอียด'), vm.$t('สถานะการอนุมัติ')
             ])
             docs.forEach(function (doc) {
+              let createdBy = vm._.find(vm.authUserOptions, {'id': doc.data().createdBy}).label
+              let stockType = vm._.find(vm.stockTypeOptions, {'id': doc.data().stockType}).label
+              let productType = vm._.find(vm.productTypeOptions, {'id': doc.data().productType}).label
+              let product = vm._.find(vm.productOptions, {'id': doc.data().product}).label
               productCount++
               datatable.push([
                 {text: `${date.formatDate(doc.data().createdOn, 'DD/MM/YYYY HH:mm')}`, alignment: 'left'},
-                {text: `${doc.data().createdBy}`, alignment: 'left'},
+                {text: `${createdBy}`, alignment: 'left'},
                 {text: `${doc.data().code}`, alignment: 'left'},
-                {text: `${doc.data().stockType}`, alignment: 'left'},
-                {text: `${doc.data().productType}`, alignment: 'left'},
-                {text: `${doc.data().product}`, alignment: 'left'},
+                {text: `${stockType}`, alignment: 'left'},
+                {text: `${productType}`, alignment: 'left'},
+                {text: `${product}`, alignment: 'left'},
                 {text: `${doc.data().qty}`, alignment: 'left'},
                 {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().approval}`, alignment: 'left'}
