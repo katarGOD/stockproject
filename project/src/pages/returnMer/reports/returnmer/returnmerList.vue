@@ -127,7 +127,7 @@ export default {
                 {text: `${doc.data().code}`, alignment: 'left'},
                 {text: `${product}`, alignment: 'left'},
                 {text: `${doc.data().SerialNo}`, alignment: 'left'},
-                {text: `${doc.data().price}`, alignment: 'left'}
+                {text: `${doc.data().price.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'left'}
               ])
             })
             datatable.push([

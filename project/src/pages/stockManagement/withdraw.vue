@@ -971,7 +971,7 @@ export default {
                 {text: ``, alignment: 'left'},
                 {text: `รวมเป็นจำนวนทั้งสิ้น`, alignment: 'center', colSpan: 2},
                 {text: ``, alignment: 'left'},
-                {text: `${(doc.data().qty)}`, alignment: 'center'}
+                {text: `${productCount}`, alignment: 'center'}
               ]
             )
             result.push(

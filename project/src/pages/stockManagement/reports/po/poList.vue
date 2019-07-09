@@ -107,19 +107,16 @@ export default {
     getProductList () {
       let vm = this
       let result = []
-      let totalQty = 0
       return new Promise(resolve => {
         vm.$database.collection('poProduct')
           .get().then(docs => {
             docs.forEach(doc => {
-              totalQty++
               result.push({
-                totalQty: totalQty,
-                totalPrice: vm._.find(vm.productOptions, {'id': doc.data().product}).data.buyIn,
+                qty: doc.data().qty,
+                totalPrice: vm._.find(vm.productOptions, {'id': doc.data().product}).data.buyIn * doc.data().qty,
                 poId: doc.data().poId
               })
             })
-            console.log(result)
             return resolve(result)
           })
       })
@@ -149,7 +146,7 @@ export default {
               let productList = vm._.filter(productSum, {'poId': doc.id}) ? vm._.filter(productSum, {'poId': doc.id}) : []
               if (productList.length) {
                 productList.forEach(eachProduct => {
-                  totalQty++
+                  totalQty += eachProduct.qty
                   totalPrice += eachProduct.totalPrice
                 })
               }
@@ -159,7 +156,7 @@ export default {
                 {text: `${createdBy}`, alignment: 'left'},
                 {text: `${doc.data().code}`, alignment: 'left'},
                 {text: `${totalQty}`, alignment: 'left'},
-                {text: `${totalPrice}`, alignment: 'left'},
+                {text: `${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'left'},
                 {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().approval}`, alignment: 'left'}
               ])

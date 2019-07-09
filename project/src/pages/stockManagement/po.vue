@@ -964,7 +964,7 @@ export default {
                 {text: `${vm._.find(vm.productOptions, {'id': eachProduct.product}).data.description}`, alignment: 'left', border: [true, false, true, false]},
                 {text: `${eachProduct.qty}`, alignment: 'center', border: [true, false, true, false]},
                 {text: `${productPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right', border: [true, false, true, false]},
-                {text: `${(productPrice * eachProduct.qty)}`, alignment: 'center', border: [true, false, true, false]}
+                {text: `${(productPrice * eachProduct.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'right', border: [true, false, true, false]}
               ])
               rowCount++
             })

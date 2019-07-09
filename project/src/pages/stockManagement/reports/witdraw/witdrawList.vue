@@ -104,8 +104,25 @@ export default {
       }
       return result
     },
+    getProductList () {
+      let vm = this
+      let result = []
+      return new Promise(resolve => {
+        vm.$database.collection('withdrawProduct')
+          .get().then(docs => {
+            docs.forEach(doc => {
+              result.push({
+                qty: doc.data().qty,
+                withdrawId: doc.data().withdrawId
+              })
+            })
+            return resolve(result)
+          })
+      })
+    },
     // making report data
-    getPoList () {
+    async getPoList () {
+      let productSum = await this.getProductList()
       return new Promise(resolve => {
         let vm = this
         let result = []
@@ -117,31 +134,31 @@ export default {
           .then(function (docs) {
             datatable.push([
               vm.$t('วันเวลา'), vm.$t('ผู้ทำรายการ'),
-              vm.$t('รหัสสินค้า'), vm.$t('หมวดหมู่อุปกรณ์'),
-              vm.$t('ประเภทอุปกรณ์'), vm.$t('สินค้า'),
-              vm.$t('จำนวนสินค้าที่เบิก'),
+              vm.$t('เลขที่ใบเสร็จ'),
+              vm.$t('จำนวนสินค้าที่เบิกทั้งหมด'),
               vm.$t('รายละเอียด'), vm.$t('สถานะการอนุมัติ')
             ])
             docs.forEach(function (doc) {
               let createdBy = vm._.find(vm.authUserOptions, {'id': doc.data().createdBy}).label
-              let stockType = vm._.find(vm.stockTypeOptions, {'id': doc.data().stockType}).label
-              let productType = vm._.find(vm.productTypeOptions, {'id': doc.data().productType}).label
-              let product = vm._.find(vm.productOptions, {'id': doc.data().product}).label
+              let totalQty = 0
+              let productList = vm._.filter(productSum, {'withdrawId': doc.id}) ? vm._.filter(productSum, {'withdrawId': doc.id}) : []
+              if (productList.length) {
+                productList.forEach(eachProduct => {
+                  totalQty += eachProduct.qty
+                })
+              }
               productCount++
               datatable.push([
                 {text: `${date.formatDate(doc.data().createdOn, 'DD/MM/YYYY HH:mm')}`, alignment: 'left'},
                 {text: `${createdBy}`, alignment: 'left'},
                 {text: `${doc.data().code}`, alignment: 'left'},
-                {text: `${stockType}`, alignment: 'left'},
-                {text: `${productType}`, alignment: 'left'},
-                {text: `${product}`, alignment: 'left'},
-                {text: `${doc.data().qty}`, alignment: 'left'},
+                {text: `${totalQty}`, alignment: 'left'},
                 {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().approval}`, alignment: 'left'}
               ])
             })
             datatable.push([
-              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 9, bold: true, alignment: 'right'}
+              {text: 'Total Product : ' + productCount, fontSize: 16, colSpan: 6, bold: true, alignment: 'right'}
             ])
             result.push(
               {
@@ -160,7 +177,7 @@ export default {
             result.push({
               table: {
                 headerRows: 1,
-                widths: [ 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto' ],
+                widths: [ '*', '*', '*', '*', '*', '*' ],
                 body: datatable
               },
               layout: 'headerLineOnly'
