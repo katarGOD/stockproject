@@ -187,7 +187,7 @@
               @blur="$v.inputForm.stockType.$touch()"
             />
           </q-field>
-          <q-field
+          <!-- <q-field
             :label="$t('Product Type') + ' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.productType.$error"
@@ -198,7 +198,7 @@
               :options="productTypeOptions"
               @blur="$v.inputForm.productType.$touch()"
             />
-          </q-field>
+          </q-field> -->
           <q-field
             :label="$t('Supplier') + ' *'"
             :label-width="labelWidth"
@@ -284,7 +284,7 @@
           </q-td>
         </q-table>
           <!-- field description -->
-          <q-field
+          <!-- <q-field
             :label="$t('Qty')+' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.qty.$error"
@@ -295,8 +295,8 @@
               type="number"
               @blur="$v.inputForm.qty.$touch()"
             />
-          </q-field>
-          <q-field
+          </q-field> -->
+          <!-- <q-field
             :label="$t('Total price')+' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.totalPrice.$error"
@@ -308,7 +308,7 @@
               disable
               @blur="$v.inputForm.totalPrice.$touch()"
             />
-          </q-field>
+          </q-field> -->
           <q-field
               :label="$t('Approval status')"
               :label-width="labelWidth"
@@ -553,11 +553,8 @@ export default {
     inputForm: {
       index: { required, numeric },
       code: { required },
-      productType: { required },
       supplier: { required },
-      stockType: { required },
-      qty: { required, numeric },
-      totalPrice: { required, numeric }
+      stockType: { required }
     },
     productForm: {
       productType: { required },
@@ -604,7 +601,7 @@ export default {
       vm.inputForm.index = null
       vm.inputForm.code = null
       vm.inputForm.stockType = null
-      vm.inputForm.productType = null
+      vm.inputForm.supplier = null
       vm.inputForm.description = null
       vm.inputForm.qty = null
       vm.inputForm.createdBy = this.userId

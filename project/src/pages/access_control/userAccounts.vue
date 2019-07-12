@@ -105,7 +105,7 @@
             />
           </q-field>
           <!-- Locale -->
-          <q-field
+          <!-- <q-field
             :label="$t('Locale')"
             :label-width="labelWidth"
           >
@@ -113,7 +113,7 @@
               v-model="inputForm.locale"
               :options="localeOptions"
             />
-          </q-field>
+          </q-field> -->
           <!-- field active -->
           <q-field
             :label="$t('Active')"

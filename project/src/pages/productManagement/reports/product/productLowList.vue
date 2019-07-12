@@ -119,7 +119,7 @@ export default {
                 {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().buyIn.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'left'},
                 {text: `${doc.data().buyOut.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'left'},
-                {text: `${doc.data().qty}`, alignment: 'left'}
+                {text: `${doc.data().qty}`, alignment: 'center'}
               ])
             })
             datatable.push([
@@ -134,7 +134,7 @@ export default {
             )
             result.push(
               {
-                text: `รายงานสินค้าทั้งหมด`,
+                text: `รายงานสินค้าคงคลังใกล้หมด`,
                 style: 'header',
                 alignment: 'center'
               }
@@ -142,7 +142,7 @@ export default {
             result.push({
               table: {
                 headerRows: 1,
-                widths: [ '*', '*', '*', '*', '*' ],
+                widths: [ '*', '*', '*', '*', 'auto' ],
                 body: datatable
               },
               layout: 'headerLineOnly'

@@ -73,6 +73,12 @@
           <q-btn size="xs" small flat round icon="add" @click="increaseIndex(props, $firestore.productType)" />
         </span>
       </q-td>
+      <q-td slot="body-cell-buyIn" slot-scope="props" :props="props">
+        {{ props.value.toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
+      </q-td>
+      <q-td slot="body-cell-buyOut" slot-scope="props" :props="props">
+        {{ props.value.toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
+      </q-td>
       <!-- code -->
       <q-td slot="body-cell-code" slot-scope="props" :props="props">
         <q-btn
@@ -282,8 +288,22 @@ export default {
         },
         {
           name: 'description',
-          label: this.$t('Description'),
+          label: this.$t('Product Name'),
           field: 'description',
+          sortable: false,
+          align: 'left'
+        },
+        {
+          name: 'buyIn',
+          label: this.$t('Buy In'),
+          field: 'buyIn',
+          sortable: false,
+          align: 'left'
+        },
+        {
+          name: 'buyOut',
+          label: this.$t('Buy Out'),
+          field: 'buyOut',
           sortable: false,
           align: 'left'
         },
@@ -295,7 +315,7 @@ export default {
           align: 'left'
         }
       ],
-      visibleColumns: ['index', 'code', 'description'],
+      visibleColumns: ['index', 'code', 'description', 'buyIn', 'buyOut'],
       // inputForm
       inputForm: {
         '.key': null,

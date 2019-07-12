@@ -142,7 +142,7 @@ export default {
             )
             result.push(
               {
-                text: `รายงานสินค้าทั้งหมด`,
+                text: `รายงานส่งคืนสินค้าทั้งหมด`,
                 style: 'header',
                 alignment: 'center'
               }

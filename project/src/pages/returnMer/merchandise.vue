@@ -68,6 +68,9 @@
       <q-td slot="body-cell-createdOn" slot-scope="props" :props="props">
         {{ FormatDate(props.value, 'ddd, DD MMM YYYY HH:mm') }}
       </q-td>
+      <q-td slot="body-cell-product" slot-scope="props" :props="props">
+        {{ _.find(productOptions, {'id': props.value}).label }}
+      </q-td>
       <!-- custom index -->
       <q-td slot="body-cell-index" slot-scope="props" :props="props">
         <span small color="secondary">
@@ -171,7 +174,7 @@
             :error-label="`${!$v.inputForm.SerialNo.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.SerialNo.numeric ? $t('onlyNumerics') : ''}`"
           >
             <q-input
-              v-model="inputForm.SerialNo"
+              v-model="inputForm.SerialNo" max="10"
               type="number"
               @blur="$v.inputForm.SerialNo.$touch()"
             />
@@ -231,7 +234,7 @@
 import { mapGetters } from 'vuex'
 import stockTypeOptions from 'src/components/options/stockTypeOptions'
 import productTypeOptions from 'src/components/options/productTypeOptions'
-import { required, numeric } from 'vuelidate/lib/validators'
+import { required, numeric, minLength, maxLength } from 'vuelidate/lib/validators'
 import crudProcess from 'src/components/datatable/crudProcess'
 import publicVars from 'src/components/shared/publicVars'
 import productOptions from 'src/components/options/productOptions'
@@ -294,6 +297,13 @@ export default {
           align: 'left'
         },
         {
+          name: 'product',
+          label: this.$t('Product Name'),
+          field: 'product',
+          sortable: false,
+          align: 'left'
+        },
+        {
           name: 'createdOn',
           label: this.$t('Created On'),
           field: 'createdOn',
@@ -301,7 +311,7 @@ export default {
           align: 'left'
         }
       ],
-      visibleColumns: ['index', 'code', 'SerialNo', 'createdOn'],
+      visibleColumns: ['index', 'code', 'SerialNo', 'product'],
       // inputForm
       inputForm: {
         '.key': null,
@@ -336,7 +346,7 @@ export default {
     inputForm: {
       index: { required, numeric },
       code: { required },
-      SerialNo: { required },
+      SerialNo: { required, minLength: minLength(10), maxLength: maxLength(10) },
       price: { required },
       product: { required }
     }

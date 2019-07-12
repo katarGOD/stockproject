@@ -152,7 +152,7 @@ export default {
                 {text: `${date.formatDate(doc.data().createdOn, 'DD/MM/YYYY HH:mm')}`, alignment: 'left'},
                 {text: `${createdBy}`, alignment: 'left'},
                 {text: `${doc.data().code}`, alignment: 'left'},
-                {text: `${totalQty}`, alignment: 'left'},
+                {text: `${totalQty}`, alignment: 'center'},
                 {text: `${doc.data().description}`, alignment: 'left'},
                 {text: `${doc.data().approval}`, alignment: 'left'}
               ])
@@ -169,7 +169,7 @@ export default {
             )
             result.push(
               {
-                text: `รายงานสินค้าทั้งหมด`,
+                text: `รายงานใบเบิกสินค้าทั้งหมด`,
                 style: 'header',
                 alignment: 'center'
               }
@@ -177,7 +177,7 @@ export default {
             result.push({
               table: {
                 headerRows: 1,
-                widths: [ '*', '*', '*', '*', '*', '*' ],
+                widths: [ '*', '*', '*', 'auto', '*', '*' ],
                 body: datatable
               },
               layout: 'headerLineOnly'

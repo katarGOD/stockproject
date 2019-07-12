@@ -405,9 +405,23 @@ export default {
           align: 'left'
         },
         {
+          name: 'qty',
+          label: this.$t('Qty'),
+          field: 'qty',
+          sortable: true,
+          align: 'left'
+        },
+        {
           name: 'description',
           label: this.$t('Description'),
           field: 'description',
+          sortable: false,
+          align: 'left'
+        },
+        {
+          name: 'approval',
+          label: this.$t('Status'),
+          field: 'approval',
           sortable: false,
           align: 'left'
         },
@@ -465,7 +479,7 @@ export default {
         }
       ],
       visibleColumnsProduct: ['index', 'productType', 'product', 'qty', 'action'],
-      visibleColumns: ['index', 'code', 'description'],
+      visibleColumns: ['index', 'code', 'description', 'approval'],
       // inputForm
       inputForm: {
         '.key': null,

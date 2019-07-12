@@ -173,7 +173,7 @@ export default {
             )
             result.push(
               {
-                text: `รายงานสินค้าทั้งหมด`,
+                text: `รายงานใบสั่งซื้อทั้งหมด`,
                 style: 'header',
                 alignment: 'center'
               }

@@ -12,11 +12,10 @@
     >
       <q-item-main :label="$t('Product')"/>
     </q-item>
-    <q-list-header>{{$t('report')}}</q-list-header>
       <q-item
         to="/product-management/product-report"
       >
-        <q-item-main :label="$t('รายงานสินค้า')"/>
+        <q-item-main :label="$t('Product Report')"/>
       </q-item>
   </q-collapsible>
 </template>

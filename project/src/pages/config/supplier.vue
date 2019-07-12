@@ -250,6 +250,20 @@ export default {
           align: 'left'
         },
         {
+          name: 'suppTel',
+          label: this.$t('Supplier Tel'),
+          field: 'suppTel',
+          sortable: false,
+          align: 'left'
+        },
+        {
+          name: 'description',
+          label: this.$t('Description'),
+          field: 'description',
+          sortable: false,
+          align: 'left'
+        },
+        {
           name: 'createdBy',
           label: this.$t('Created by'),
           field: 'createdBy',
@@ -257,7 +271,7 @@ export default {
           align: 'left'
         }
       ],
-      visibleColumns: ['index', 'code', 'suppName'],
+      visibleColumns: ['index', 'code', 'suppName', 'suppTel', 'description'],
       // inputForm
       inputForm: {
         '.key': null,

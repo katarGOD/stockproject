@@ -456,6 +456,13 @@ export default {
           align: 'left'
         },
         {
+          name: 'approval',
+          label: this.$t('Status'),
+          field: 'approval',
+          sortable: false,
+          align: 'left'
+        },
+        {
           name: 'createdBy',
           label: this.$t('Created by'),
           field: 'createdBy',
@@ -516,7 +523,7 @@ export default {
         }
       ],
       visibleColumnsProduct: ['index', 'productType', 'product', 'qty', 'price', 'action'],
-      visibleColumns: ['index', 'code', 'description'],
+      visibleColumns: ['index', 'code', 'approval', 'description'],
       // inputForm
       inputForm: {
         '.key': null,
@@ -524,6 +531,7 @@ export default {
         code: null,
         stockType: null,
         supplier: null,
+        suppName: null,
         description: null,
         createdBy: this.userId,
         approval: 'waiting',

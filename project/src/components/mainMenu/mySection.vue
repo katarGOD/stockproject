@@ -13,9 +13,9 @@
     <q-item :to="{ path: `/my-account/profile/${userId}` }">
       <q-item-main :label="$t('Profile')"/>
     </q-item>
-    <q-item to="/my-account/change-password">
+    <!-- <q-item to="/my-account/change-password">
       <q-item-main :label="$t('Change Password')"/>
-    </q-item>
+    </q-item> -->
   </q-collapsible>
 </template>
 <script>

@@ -20,7 +20,7 @@
     <q-item
       to="/stock-management/stock-report"
     >
-      <q-item-main :label="$t('รายงานการสั่งซื้อ/เบิก')"/>
+      <q-item-main :label="$t('Po/Withdraw Report')"/>
     </q-item>
   </q-collapsible>
 </template>
