@@ -117,8 +117,8 @@ export default {
               datatable.push([
                 {text: `${doc.data().code}`, alignment: 'left'},
                 {text: `${doc.data().description}`, alignment: 'left'},
-                {text: `${doc.data().buyIn}`, alignment: 'left'},
-                {text: `${doc.data().buyOut}`, alignment: 'left'},
+                {text: `${doc.data().buyIn.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'left'},
+                {text: `${doc.data().buyOut.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, alignment: 'left'},
                 {text: `${doc.data().qty}`, alignment: 'left'}
               ])
             })

@@ -116,6 +116,7 @@ export default {
           }
         }
       }
+      console.log(inputForm)
     },
     // open add form
     openAddForm (inputForm) {

@@ -68,9 +68,9 @@
       <!-- custom index -->
       <q-td slot="body-cell-index" slot-scope="props" :props="props">
         <span small color="secondary">
-          <q-btn size="xs" small flat round icon="remove" @click="decreaseIndex(props, $firestore.productType)" />
+          <q-btn size="xs" small flat round icon="remove" @click="decreaseIndex(props, $firestore.po)" />
           {{ props.value }}
-          <q-btn size="xs" small flat round icon="add" @click="increaseIndex(props, $firestore.productType)" />
+          <q-btn size="xs" small flat round icon="add" @click="increaseIndex(props, $firestore.po)" />
         </span>
       </q-td>
       <!-- code -->
@@ -158,7 +158,7 @@
             :error-label="`${!$v.inputForm.index.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.index.numeric ? $t('onlyNumerics') : ''}`"
           >
             <q-input
-              v-model="inputForm.index"
+              v-model="inputForm.index" disable
               type="number"
               @blur="$v.inputForm.index.$touch()"
             />
@@ -187,7 +187,7 @@
               @blur="$v.inputForm.stockType.$touch()"
             />
           </q-field>
-          <q-field
+          <!-- <q-field
             :label="$t('Product Type') + ' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.productType.$error"
@@ -198,7 +198,7 @@
               :options="productTypeOptions"
               @blur="$v.inputForm.productType.$touch()"
             />
-          </q-field>
+          </q-field> -->
           <q-field
             :label="$t('Supplier') + ' *'"
             :label-width="labelWidth"
@@ -214,8 +214,10 @@
           <q-field
             :label="$t('Description')"
             :label-width="labelWidth"
+            :error="$v.inputForm.description.$error"
+            :error-label="$t('Requires non-empty data')"
           >
-            <q-input v-model="inputForm.description"/>
+            <q-input v-model="inputForm.description" @blur="$v.inputForm.description.$touch()"/>
           </q-field>
           <q-table
             row-key=".key"
@@ -284,7 +286,7 @@
           </q-td>
         </q-table>
           <!-- field description -->
-          <q-field
+          <!-- <q-field
             :label="$t('Qty')+' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.qty.$error"
@@ -295,8 +297,8 @@
               type="number"
               @blur="$v.inputForm.qty.$touch()"
             />
-          </q-field>
-          <q-field
+          </q-field> -->
+          <!-- <q-field
             :label="$t('Total price')+' *'"
             :label-width="labelWidth"
             :error="$v.inputForm.totalPrice.$error"
@@ -308,7 +310,7 @@
               disable
               @blur="$v.inputForm.totalPrice.$touch()"
             />
-          </q-field>
+          </q-field> -->
           <q-field
               :label="$t('Approval status')"
               :label-width="labelWidth"
@@ -522,15 +524,12 @@ export default {
         code: null,
         stockType: null,
         supplier: null,
-        productType: null,
         description: null,
-        qty: null,
         createdBy: this.userId,
         approval: 'waiting',
         createdOn: new Date(),
         modifiedBy: this.userId,
-        modifiedOn: new Date(),
-        totalPrice: 0
+        modifiedOn: new Date()
       },
       productForm: {
         '.key': null,
@@ -560,11 +559,9 @@ export default {
     inputForm: {
       index: { required, numeric },
       code: { required },
-      productType: { required },
+      description: { required },
       supplier: { required },
-      stockType: { required },
-      qty: { required, numeric },
-      totalPrice: { required, numeric }
+      stockType: { required }
     },
     productForm: {
       productType: { required },
@@ -601,26 +598,25 @@ export default {
       vm.formAction = 'add'
       vm.initialInputFormModel()
       vm.initialProductForm()
+      console.log('22')
       vm.poProductTable = []
+      vm.addProductCheck = false
       vm.formModal = true
     },
     initialInputFormModel () {
       let vm = this
-      vm.addProductCheck = false
-      vm.initialProductForm()
       vm.inputForm['.key'] = null
-      vm.inputForm.index = null
+      vm.inputForm.index = vm.collectionSize + 1
       vm.inputForm.code = null
       vm.inputForm.stockType = null
-      vm.inputForm.productType = null
+      vm.inputForm.supplier = null
       vm.inputForm.description = null
-      vm.inputForm.qty = null
       vm.inputForm.createdBy = this.userId
       vm.inputForm.approval = 'waiting'
       vm.inputForm.createdOn = new Date()
       vm.inputForm.modifiedBy = this.userId
       vm.inputForm.modifiedOn = new Date()
-      vm.inputForm.totalPrice = 0
+      vm.addProductCheck = false
     },
     initialProductForm () {
       let vm = this
@@ -1099,28 +1095,10 @@ export default {
     ])
   },
   watch: {
-    'inputForm.product' () {
-      let vm = this
-      let total = 0
-      if (vm.inputForm.product) {
-        let price = vm._.find(vm.productAll, {'id': vm.inputForm.product}).price
-        console.log(price)
-        total = price * vm.inputForm.qty
-        vm.inputForm.totalPrice = total
-      }
-    },
-    'inputForm.qty' () {
-      let vm = this
-      let total = 0
-      if (vm.inputForm.product) {
-        let price = vm._.find(vm.productAll, {'id': vm.inputForm.product}).price
-        console.log(price)
-        total = price * vm.inputForm.qty
-        vm.inputForm.totalPrice = total
-      }
-    },
     async 'selected' () {
-      await this.getPoProduct(this.selected[0]['.key'])
+      if (this.selected.length) {
+        await this.getPoProduct(this.selected[0]['.key'])
+      }
     }
   }
 }

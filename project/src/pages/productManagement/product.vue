@@ -107,7 +107,7 @@
             :error-label="`${!$v.inputForm.index.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.index.numeric ? $t('onlyNumerics') : ''}`"
           >
             <q-input
-              v-model="inputForm.index"
+              v-model="inputForm.index" disable
               type="number"
               @blur="$v.inputForm.index.$touch()"
             />
@@ -152,8 +152,10 @@
           <q-field
             :label="$t('ชื่อสินค้า')"
             :label-width="labelWidth"
+            :error="$v.inputForm.description.$error"
+            :error-label="`${!$v.inputForm.description.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.description ? $t('asd') : ''}`"
           >
-            <q-input v-model="inputForm.description"/>
+            <q-input v-model="inputForm.description" @blur="$v.inputForm.description.$touch()"/>
           </q-field>
           <q-field
             :label="$t('Buy In')+' *'"
@@ -331,6 +333,7 @@ export default {
     inputForm: {
       index: { required, numeric },
       code: { required },
+      description: { required },
       productType: { required },
       stockType: { required },
       qty: { required, numeric },

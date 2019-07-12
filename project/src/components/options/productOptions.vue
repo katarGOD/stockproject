@@ -23,7 +23,7 @@ export default {
             code: doc.data().code,
             // for selection
             value: doc.id,
-            label: `${doc.data().code} : ${doc.data().description}`
+            label: `${doc.data().description}`
           })
         })
       })

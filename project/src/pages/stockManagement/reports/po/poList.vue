@@ -113,7 +113,7 @@ export default {
             docs.forEach(doc => {
               result.push({
                 qty: doc.data().qty,
-                totalPrice: vm._.find(vm.productOptions, {'id': doc.data().product}).data.buyIn * doc.data().qty,
+                totalPrice: (vm._.find(vm.productOptions, {'id': doc.data().product}).data.buyIn ? vm._.find(vm.productOptions, {'id': doc.data().product}).data.buyIn : 0) * doc.data().qty,
                 poId: doc.data().poId
               })
             })

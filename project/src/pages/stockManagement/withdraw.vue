@@ -154,14 +154,11 @@
           <q-field
             :label="$t('Index')+' *'"
             :label-width="labelWidth"
-            :error="$v.inputForm.index.$error"
-            :error-label="`${!$v.inputForm.index.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.index.numeric ? $t('onlyNumerics') : ''}`"
           >
             <q-input
-              v-model="inputForm.index"
+              v-model="inputForm.index" disable
               type="number"
               @blur="$v.inputForm.index.$touch()"
-              :disable="inputForm.approval === 'approval'"
             />
           </q-field>
           <!-- field code -->
@@ -255,11 +252,13 @@
           <q-field
             :label="$t('Description')"
             :label-width="labelWidth"
+            :error="$v.inputForm.description.$error"
+            :error-label="$t('Requires non-empty data')"
           >
-            <q-input v-model="inputForm.description"
+            <q-input v-model="inputForm.description" @blur="$v.inputForm.description.$touch()"
             :disable="inputForm.approval === 'approval'"/>
           </q-field>
-          <q-field
+          <!-- <q-field
             :label="$t('Qty All')+' *'"
             :label-width="labelWidth"
           >
@@ -268,7 +267,7 @@
               type="number"
               disabled
             />
-          </q-field>
+          </q-field> -->
           <q-field
               :label="$t('Approval status')"
               :label-width="labelWidth"
@@ -478,8 +477,7 @@ export default {
         approval: 'waiting',
         createdOn: new Date(),
         modifiedBy: this.userId,
-        modifiedOn: new Date(),
-        totalPrice: 0
+        modifiedOn: new Date()
       },
       productForm: {
         '.key': null,
@@ -507,10 +505,9 @@ export default {
   // validations
   validations: {
     inputForm: {
-      index: { required, numeric },
       code: { required },
       stockType: { required },
-      totalPrice: { required, numeric }
+      description: { required }
     },
     productForm: {
       productType: { required },
@@ -700,20 +697,18 @@ export default {
     },
     initialInputFormModel () {
       let vm = this
-      vm.addProductCheck = false
       vm.initialProductForm()
       vm.inputForm['.key'] = null
-      vm.inputForm.index = null
+      vm.inputForm.index = vm.collectionSize + 1
       vm.inputForm.code = null
       vm.inputForm.stockType = null
       vm.inputForm.description = null
-      vm.inputForm.qty = null
       vm.inputForm.createdBy = this.userId
       vm.inputForm.approval = 'waiting'
       vm.inputForm.createdOn = new Date()
       vm.inputForm.modifiedBy = this.userId
       vm.inputForm.modifiedOn = new Date()
-      vm.inputForm.totalPrice = 0
+      vm.addProductCheck = false
     },
     initialProductForm () {
       let vm = this
@@ -1059,15 +1054,13 @@ export default {
     ...mapGetters(['userId', 'applicationName'])
   },
   watch: {
-    'inputForm.product' () {
-      let vm = this
-      if (vm.inputForm.product) {
-        let qty = vm._.find(vm.productAll, {'id': vm.inputForm.product}).qty
-        vm.qtyAll = qty
-      }
-    },
     async 'selected' () {
-      await this.getWithdrawProduct(this.selected[0]['.key'])
+      if (this.selected.length) {
+        await this.getWithdrawProduct(this.selected[0]['.key'])
+      } else {
+        console.log('else')
+        this.initialInputForm(this.inputForm)
+      }
     }
   }
 }

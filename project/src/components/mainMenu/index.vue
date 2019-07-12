@@ -66,6 +66,7 @@ import hasPermission from 'src/components/shared/hasPermission'
 import mySection from './mySection'
 import systemSetting from './systemSetting'
 import accessControl from './accessControl'
+import authUserOptions from 'src/components/options/authUserOptions'
 import config from './config'
 import product from './product'
 import stockManagement from './stockManagement'
@@ -75,7 +76,8 @@ import returnMer from './returnMer'
 export default {
   // mixins
   mixins: [
-    hasPermission
+    hasPermission,
+    authUserOptions
   ],
   // components
   components: {
@@ -100,9 +102,9 @@ export default {
       let result = ''
       try {
         if (vm.userAccount.phoneNumber) {
-          result = vm.userAccount.phoneNumber
+          result = vm._.find(vm.authUserOptions, {'id': vm.userId}).label
         } else {
-          result = vm.userAccount.email
+          result = vm._.find(vm.authUserOptions, {'id': vm.userId}).label
         }
       } catch (err) {
         result = ''

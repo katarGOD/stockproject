@@ -107,7 +107,7 @@
             :error-label="`${!$v.inputForm.index.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.index.numeric ? $t('onlyNumerics') : ''}`"
           >
             <q-input
-              v-model="inputForm.index"
+              v-model="inputForm.index" disable
               type="number"
               @blur="$v.inputForm.index.$touch()"
             />
@@ -138,8 +138,10 @@
           <q-field
             :label="$t('รายละเอียด')"
             :label-width="labelWidth"
+            :error="$v.inputForm.description.$error"
+            :error-label="`${!$v.inputForm.description.required ? $t('Requires non-empty data') : ''}`"
           >
-            <q-input v-model="inputForm.description"/>
+            <q-input v-model="inputForm.description" @blur="$v.inputForm.description.$touch()"/>
           </q-field>
           <q-field
             :label="$t('ที่อยู่')"
@@ -293,6 +295,7 @@ export default {
       code: { required },
       suppName: { required },
       suppAddress: { required },
+      description: { required },
       suppTel: { required }
     }
   },

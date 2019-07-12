@@ -110,7 +110,7 @@
             :error-label="`${!$v.inputForm.index.required ? $t('Requires non-empty data') : ''} ${!$v.inputForm.index.numeric ? $t('onlyNumerics') : ''}`"
           >
             <q-input
-              v-model="inputForm.index"
+              v-model="inputForm.index" disable
               type="number"
               @blur="$v.inputForm.index.$touch()"
             />
