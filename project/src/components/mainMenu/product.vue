@@ -13,6 +13,7 @@
       <q-item-main :label="$t('Product')"/>
     </q-item>
       <q-item
+        v-if="hasPermission(['access-control--product-report'])"
         to="/product-management/product-report"
       >
         <q-item-main :label="$t('Product Report')"/>

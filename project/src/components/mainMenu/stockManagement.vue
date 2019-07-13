@@ -1,5 +1,7 @@
 <template>
+
   <q-collapsible
+    v-if="hasPermission(['access-control--stock-managestock'])"
     indent
     icon="category"
     @show="toggleCollapse"
@@ -8,16 +10,19 @@
     :class="collapseState"
   >
     <q-item
+      v-if="hasPermission(['access-control--stock-po'])"
       to="/stock-management/po"
     >
       <q-item-main :label="$t('Purchase Order')"/>
     </q-item>
     <q-item
+      v-if="hasPermission(['access-control--stock-withdraw'])"
       to="/stock-management/withdraw"
     >
       <q-item-main :label="$t('Withdraw')"/>
     </q-item>
     <q-item
+      v-if="hasPermission(['access-control--stock-report'])"
       to="/stock-management/stock-report"
     >
       <q-item-main :label="$t('Po/Withdraw Report')"/>
