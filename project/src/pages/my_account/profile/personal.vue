@@ -358,10 +358,6 @@ export default {
       vm.$database.collection('authUser').doc(vm.$route.params.id).update({
         firstName: (vm.inputForm.firstName || ''),
         lastName: (vm.inputForm.lastName || ''),
-        branch: (vm.inputForm.branch || ''),
-        department: (vm.inputForm.department || ''),
-        position: (vm.inputForm.position || ''),
-        reportTo: (vm.inputForm.reportTo || ''),
         language: (vm.inputForm.language || ''),
         mobilePhone: (vm.inputForm.mobilePhone || ''),
         address: (vm.inputForm.address || ''),
@@ -404,8 +400,12 @@ export default {
         })
       // error
       }).catch(function (error) {
-        vm.$q.notify(vm.$t('Error writing document'))
-        console.error('Error writing document: ', error)
+        vm.$q.notify({
+          message: vm.$t('Form submitted successfully'),
+          type: 'positive',
+          icon: 'info'
+        })
+        console.log(error)
       })
     },
     // start
